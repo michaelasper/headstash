@@ -1,0 +1,85 @@
+// Headstash Prisma schema
+//
+// v1 goals:
+// - log strain reviews
+// - basic tagging
+// - accounts later (keep User model to support that)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum StrainType {
+  INDICA
+  SATIVA
+  HYBRID
+}
+
+model User {
+  id          String   @id @default(cuid())
+  email       String?  @unique
+  displayName String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  reviews Review[]
+}
+
+model Strain {
+  id        String     @id @default(cuid())
+  name      String
+  brand     String?
+  type      StrainType?
+  thcPct    Float?
+  cbdPct    Float?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  reviews Review[]
+
+  @@unique([name, brand])
+}
+
+model Review {
+  id          String   @id @default(cuid())
+  rating      Int
+  notes       String?
+  consumedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  strainId String
+  strain   Strain @relation(fields: [strainId], references: [id], onDelete: Cascade)
+
+  tags ReviewTag[]
+
+  @@index([userId])
+  @@index([strainId])
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  reviews ReviewTag[]
+}
+
+model ReviewTag {
+  reviewId  String
+  tagId     String
+  assignedAt DateTime @default(now())
+
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([reviewId, tagId])
+  @@index([tagId])
+}
