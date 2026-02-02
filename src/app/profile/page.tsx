@@ -69,9 +69,21 @@ export default async function ProfilePage() {
         }}
       />
 
-      <p className="text-xs text-neutral-500">
-        Note: public profile route (/u/[handle]) is coming later.
-      </p>
+      {user?.handle ? (
+        <p className="text-xs text-neutral-500">
+          Public profile: {" "}
+          <Link
+            href={`/u/${user.handle.replace(/^@/, "")}`}
+            className="underline"
+          >
+            /u/{user.handle}
+          </Link>
+        </p>
+      ) : (
+        <p className="text-xs text-neutral-500">
+          Set a handle to enable your public profile URL.
+        </p>
+      )}
     </Container>
   );
 }
