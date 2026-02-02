@@ -14,7 +14,7 @@ export default function SignInPage() {
     <Container>
       <PageHeader
         title="Sign in"
-        subtitle="Email magic link (dev-friendly)."
+        subtitle="Magic link, GitHub OAuth, or email+password."
         right={
           <Link href="/" className="text-sm text-neutral-600 hover:underline">
             Home
