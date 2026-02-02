@@ -60,6 +60,12 @@ yarn-error.log*
 *.sqlite3
 *.sqlite3-journal
 
+# dev-local uploads (do not commit user media)
+/public/uploads/**
+!/public/uploads/
+!/public/uploads/avatars/
+!/public/uploads/**/.gitkeep
+
 # vercel
 .vercel
 

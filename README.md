@@ -46,6 +46,13 @@ No extra env vars required.
 - Public profile: `/u/[handle]` (no auth required). Handle lookup is effectively case-insensitive because handles are stored lowercase.
 - Fields: `displayName`, `handle` (unique, @format), `bio`, `avatarUrl`, `links` (URLs)
 
+### Avatar upload (dev-local only)
+
+DEV ONLY: uploading an avatar writes into `public/uploads/avatars/` and sets `avatarUrl` to a local path.
+
+- This is not suitable for serverless/production.
+- Uploaded files are gitignored.
+
 Open http://localhost:3000
 
 ## Verify
