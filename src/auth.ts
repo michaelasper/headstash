@@ -1,10 +1,15 @@
 import EmailProvider from "next-auth/providers/email";
 import GitHubProvider from "next-auth/providers/github";
+import CredentialsProvider from "next-auth/providers/credentials";
 import type { NextAuthOptions } from "next-auth";
+
+import bcrypt from "bcryptjs";
+import { z } from "zod";
 
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit } from "@/auth/rateLimit";
 
 const hasSmtp = !!process.env.EMAIL_SERVER_HOST;
 
@@ -19,6 +24,42 @@ export const authOptions: NextAuthOptions = {
           }),
         ]
       : []),
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        const parsed = z
+          .object({
+            email: z.string().trim().email().max(320),
+            password: z.string().min(8).max(200),
+          })
+          .safeParse(credentials);
+
+        if (!parsed.success) return null;
+
+        const key = `login:${parsed.data.email.toLowerCase()}`;
+        const rl = checkRateLimit(key, { windowMs: 60_000, max: 8 });
+        if (!rl.ok) {
+          // Don't leak account existence; just fail.
+          return null;
+        }
+
+        const user = await prisma.user.findUnique({
+          where: { email: parsed.data.email.toLowerCase() },
+          include: { credential: true },
+        });
+
+        if (!user?.credential?.passwordHash) return null;
+
+        const ok = await bcrypt.compare(parsed.data.password, user.credential.passwordHash);
+        if (!ok) return null;
+
+        return { id: user.id, email: user.email };
+      },
+    }),
     EmailProvider({
       // If SMTP is configured, use it. Otherwise, we still register the provider,
       // but override sendVerificationRequest to log the magic link (DEV ONLY).
@@ -49,6 +90,15 @@ export const authOptions: NextAuthOptions = {
     verifyRequest: "/auth/verify",
   },
   session: { strategy: "database" },
+  callbacks: {
+    async session({ session, user }) {
+      if (session.user && user?.id) {
+        // @ts-expect-error augmenting default session user
+        session.user.id = user.id;
+      }
+      return session;
+    },
+  },
   secret:
     process.env.AUTH_SECRET ??
     process.env.NEXTAUTH_SECRET ??

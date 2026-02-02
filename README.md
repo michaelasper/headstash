@@ -32,6 +32,14 @@ npm run dev
 - `GITHUB_CLIENT_ID`
 - `GITHUB_CLIENT_SECRET`
 
+### Email + password setup (optional)
+
+No extra env vars required.
+
+- Use the **Email + password** section on `/auth/signin`.
+- Passwords are hashed with bcrypt.
+- Rate limiting is in-memory (dev-only) and resets on server restart.
+
 Open http://localhost:3000
 
 ## Verify
