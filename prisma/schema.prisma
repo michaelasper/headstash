@@ -19,6 +19,14 @@ enum StrainType {
   HYBRID
 }
 
+enum ReviewRating {
+  ONE
+  TWO
+  THREE
+  FOUR
+  FIVE
+}
+
 model User {
   id          String   @id @default(cuid())
   email       String?  @unique
@@ -45,8 +53,8 @@ model Strain {
 }
 
 model Review {
-  id          String   @id @default(cuid())
-  rating      Int
+  id          String       @id @default(cuid())
+  rating      ReviewRating
   notes       String?
   consumedAt  DateTime?
   createdAt   DateTime @default(now())
