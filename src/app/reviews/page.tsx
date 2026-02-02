@@ -263,12 +263,18 @@ export default async function ReviewsPage({
                     </p>
                   ) : null}
 
-                  <div className="mt-2">
+                  <div className="mt-2 flex items-center gap-4">
                     <Link
                       href={`/strains/${r.strainId}`}
                       className="text-xs font-medium text-neutral-900 hover:underline focus-visible:ring-2 focus-visible:ring-neutral-200"
                     >
                       View strain
+                    </Link>
+                    <Link
+                      href={`/reviews/${r.id}/edit`}
+                      className="text-xs font-medium text-neutral-900 hover:underline focus-visible:ring-2 focus-visible:ring-neutral-200"
+                    >
+                      Edit
                     </Link>
                   </div>
                 </li>

@@ -119,6 +119,126 @@ const createReviewSchema = z.object({
     .transform((v) => (v && v.length > 0 ? v : undefined)),
 });
 
+const updateReviewSchema = z.object({
+  reviewId: z.string().trim().cuid(),
+  rating: z.nativeEnum(ReviewRating),
+  effectTagId: z
+    .string()
+    .optional()
+    .transform((v) => (v && v.length > 0 ? v : undefined))
+    .refine((v) => v === undefined || z.string().cuid().safeParse(v).success, {
+      message: "effectTagId must be a cuid",
+    }),
+  terpeneTagId: z
+    .string()
+    .optional()
+    .transform((v) => (v && v.length > 0 ? v : undefined))
+    .refine((v) => v === undefined || z.string().cuid().safeParse(v).success, {
+      message: "terpeneTagId must be a cuid",
+    }),
+  consumedAt: z
+    .string()
+    .optional()
+    .transform((v) => (v && v.length > 0 ? new Date(v) : undefined))
+    .refine((d) => d === undefined || !Number.isNaN(d.valueOf()), {
+      message: "consumedAt must be a valid date",
+    }),
+  notes: z
+    .string()
+    .trim()
+    .max(4000)
+    .optional()
+    .transform((v) => (v && v.length > 0 ? v : undefined)),
+});
+
+export async function updateReview(formData: FormData) {
+  const parsed = updateReviewSchema.safeParse({
+    reviewId: formData.get("reviewId"),
+    rating: formData.get("rating"),
+    effectTagId: formData.get("effectTagId"),
+    terpeneTagId: formData.get("terpeneTagId"),
+    consumedAt: formData.get("consumedAt"),
+    notes: formData.get("notes"),
+  });
+
+  if (!parsed.success) throw new Error(parsed.error.message);
+
+  // Ownership placeholder: until auth exists, treat the local user as the only user.
+  // TODO(auth): replace with session user id and enforce strict ownership.
+  const userId = await getOrCreateLocalUserId();
+
+  const existing = await prisma.review.findUnique({
+    where: { id: parsed.data.reviewId },
+    select: { id: true, userId: true },
+  });
+
+  if (!existing) throw new Error("Review not found");
+  if (existing.userId !== userId) throw new Error("Not allowed");
+
+  await prisma.review.update({
+    where: { id: parsed.data.reviewId },
+    data: {
+      rating: parsed.data.rating,
+      consumedAt: parsed.data.consumedAt,
+      notes: parsed.data.notes,
+    },
+  });
+
+  // Update effect/terpene tag links (single-select v1): clear existing EFFECT/TERPENE tags, then add new.
+  const existingTags = await prisma.reviewTag.findMany({
+    where: { reviewId: parsed.data.reviewId },
+    include: { tag: { select: { id: true, kind: true } } },
+  });
+
+  const tagIdsToRemove = existingTags
+    .filter((rt) => rt.tag.kind === TagKind.EFFECT || rt.tag.kind === TagKind.TERPENE)
+    .map((rt) => rt.tagId);
+
+  if (tagIdsToRemove.length > 0) {
+    await prisma.reviewTag.deleteMany({
+      where: {
+        reviewId: parsed.data.reviewId,
+        tagId: { in: tagIdsToRemove },
+      },
+    });
+  }
+
+  const newTagIds = [parsed.data.effectTagId, parsed.data.terpeneTagId].filter(
+    (v): v is string => !!v,
+  );
+
+  if (newTagIds.length > 0) {
+    const tags = await prisma.tag.findMany({
+      where: { id: { in: newTagIds } },
+      select: { id: true, kind: true },
+    });
+    const byId = new Map(tags.map((t) => [t.id, t.kind] as const));
+
+    const toCreate: { reviewId: string; tagId: string }[] = [];
+    if (parsed.data.effectTagId) {
+      if (byId.get(parsed.data.effectTagId) !== TagKind.EFFECT) {
+        throw new Error("Selected effect tag is not an EFFECT tag");
+      }
+      toCreate.push({ reviewId: parsed.data.reviewId, tagId: parsed.data.effectTagId });
+    }
+    if (parsed.data.terpeneTagId) {
+      if (byId.get(parsed.data.terpeneTagId) !== TagKind.TERPENE) {
+        throw new Error("Selected terpene tag is not a TERPENE tag");
+      }
+      toCreate.push({ reviewId: parsed.data.reviewId, tagId: parsed.data.terpeneTagId });
+    }
+
+    if (toCreate.length > 0) {
+      await prisma.reviewTag.createMany({
+        data: toCreate,
+      });
+    }
+  }
+
+  revalidatePath("/reviews");
+  redirect("/reviews");
+}
+
 export async function createReview(formData: FormData) {
   const parsed = createReviewSchema.safeParse({
     strainId: formData.get("strainId"),
