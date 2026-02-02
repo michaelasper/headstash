@@ -53,6 +53,21 @@ Request-boundary validation lives in `src/app/actions.ts` (Server Actions) and i
 - `Review.rating` must be one of Prisma enum `ReviewRating` (`ONE`–`FIVE`).
 - `Review.strainId` must be a `cuid()`.
 - `Review.consumedAt` is optional; when provided it must parse as a valid date.
+- `Review` can optionally be tagged with 1 Effect tag + 1 Terpene tag (v1).
+
+## Tags (effects / terpenes)
+
+Headstash supports two kinds of tags for filtering reviews:
+
+- **Effects** (e.g., Relaxed, Uplifted)
+- **Terpenes** (e.g., Limonene, Myrcene)
+
+Create tags at `/tags` (or `/tags/new`), then select them when creating a review.
+
+Filtering:
+
+- Use the `/reviews` page search box for strain name (and notes).
+- Use the Effect/Terpene dropdown filters to narrow results.
 
 TODO (when we add fields/endpoints):
 
