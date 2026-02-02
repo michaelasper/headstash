@@ -10,6 +10,8 @@ import {
   inputClassName,
 } from "@/app/_components/ui";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "New review",
 };

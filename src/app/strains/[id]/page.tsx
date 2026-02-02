@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { Card, Container, PageHeader } from "@/app/_components/ui";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Strain",
 };
