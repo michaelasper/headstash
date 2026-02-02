@@ -50,6 +50,12 @@ export default async function MePage() {
             Edit profile
           </Link>
           <Link
+            href="/profile"
+            className="rounded-lg border border-neutral-200 bg-white px-4 py-2 text-sm font-medium hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-neutral-200"
+          >
+            View public profile
+          </Link>
+          <Link
             href="/api/auth/signout"
             className="rounded-lg border border-neutral-200 bg-white px-4 py-2 text-sm font-medium hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-neutral-200"
           >

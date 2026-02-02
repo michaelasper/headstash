@@ -43,6 +43,7 @@ No extra env vars required.
 ### Profile MVP
 
 - Edit profile at `/profile` (requires sign-in)
+- Public profile: `/u/[handle]` (no auth required). Handle lookup is effectively case-insensitive because handles are stored lowercase.
 - Fields: `displayName`, `handle` (unique, @format), `bio`, `avatarUrl`, `links` (URLs)
 
 Open http://localhost:3000
