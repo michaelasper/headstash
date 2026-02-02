@@ -17,10 +17,22 @@ export const metadata = {
 };
 
 export default async function NewReviewPage() {
-  const strains = await prisma.strain.findMany({
-    orderBy: [{ name: "asc" }],
-    take: 500,
-  });
+  const [strains, effectTags, terpeneTags] = await Promise.all([
+    prisma.strain.findMany({
+      orderBy: [{ name: "asc" }],
+      take: 500,
+    }),
+    prisma.tag.findMany({
+      where: { kind: "EFFECT" },
+      orderBy: [{ name: "asc" }],
+      take: 200,
+    }),
+    prisma.tag.findMany({
+      where: { kind: "TERPENE" },
+      orderBy: [{ name: "asc" }],
+      take: 200,
+    }),
+  ]);
 
   return (
     <Container>
@@ -78,6 +90,32 @@ export default async function NewReviewPage() {
               />
             </Field>
 
+            <Field label="Effect" hint="Optional">
+              <select name="effectTagId" className={inputClassName} defaultValue="">
+                <option value="">—</option>
+                {effectTags.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+            </Field>
+
+            <Field label="Terpene" hint="Optional">
+              <select
+                name="terpeneTagId"
+                className={inputClassName}
+                defaultValue=""
+              >
+                <option value="">—</option>
+                {terpeneTags.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+            </Field>
+
             <Field label="Notes" hint="Optional">
               <textarea
                 name="notes"
@@ -86,6 +124,10 @@ export default async function NewReviewPage() {
                 placeholder="Flavor, effects, vibe, anything worth remembering…"
               />
             </Field>
+
+            <div className="text-xs text-neutral-500">
+              Need more tags? <Link href="/tags/new" className="underline">Add a tag</Link>
+            </div>
 
             <button
               type="submit"
