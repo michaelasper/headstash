@@ -27,10 +27,8 @@ const createStrainSchema = z.object({
     .max(120)
     .optional()
     .transform((v) => (v && v.length > 0 ? v : undefined)),
-  type: z
-    .enum(["INDICA", "SATIVA", "HYBRID"])
-    .optional()
-    .transform((v) => (v ? (v as StrainType) : undefined)),
+  // Keep this aligned with Prisma's StrainType enum.
+  type: z.nativeEnum(StrainType).optional(),
 });
 
 export async function createStrain(formData: FormData) {
@@ -58,12 +56,21 @@ export async function createStrain(formData: FormData) {
 }
 
 const createReviewSchema = z.object({
-  strainId: z.string().trim().min(1),
-  rating: z.enum(["ONE", "TWO", "THREE", "FOUR", "FIVE"]),
+  // Strain IDs are cuid() by default in Prisma.
+  strainId: z.string().trim().cuid(),
+
+  // Keep this aligned with Prisma's ReviewRating enum.
+  rating: z.nativeEnum(ReviewRating),
+
+  // Accept empty string as undefined; validate date when provided.
   consumedAt: z
     .string()
     .optional()
-    .transform((v) => (v && v.length > 0 ? new Date(v) : undefined)),
+    .transform((v) => (v && v.length > 0 ? new Date(v) : undefined))
+    .refine((d) => d === undefined || !Number.isNaN(d.valueOf()), {
+      message: "consumedAt must be a valid date",
+    }),
+
   notes: z
     .string()
     .trim()
@@ -90,7 +97,7 @@ export async function createReview(formData: FormData) {
     data: {
       userId,
       strainId: parsed.data.strainId,
-      rating: parsed.data.rating as ReviewRating,
+      rating: parsed.data.rating,
       consumedAt: parsed.data.consumedAt,
       notes: parsed.data.notes,
     },
