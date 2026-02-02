@@ -23,6 +23,15 @@ npx prisma migrate dev
 npm run dev
 ```
 
+### GitHub OAuth setup (optional)
+
+1) Create a GitHub OAuth App
+- Callback URL: `http://localhost:3000/api/auth/callback/github`
+
+2) Set env vars:
+- `GITHUB_CLIENT_ID`
+- `GITHUB_CLIENT_SECRET`
+
 Open http://localhost:3000
 
 ## Verify
@@ -47,6 +56,11 @@ Expected env vars (see `.env.example`):
 - `DATABASE_URL` (SQLite connection string)
 - `AUTH_SECRET` (required in prod; dev default exists)
 - `AUTH_URL` (recommended; base URL for callbacks)
+
+OAuth (optional)
+
+- `GITHUB_CLIENT_ID`
+- `GITHUB_CLIENT_SECRET`
 
 Email magic link (optional SMTP; dev fallback logs magic link to console):
 
