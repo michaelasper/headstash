@@ -40,6 +40,11 @@ No extra env vars required.
 - Passwords are hashed with bcrypt.
 - Rate limiting is in-memory (dev-only) and resets on server restart.
 
+### Profile MVP
+
+- Edit profile at `/profile` (requires sign-in)
+- Fields: `displayName`, `handle` (unique, @format), `bio`, `avatarUrl`, `links` (URLs)
+
 Open http://localhost:3000
 
 ## Verify
