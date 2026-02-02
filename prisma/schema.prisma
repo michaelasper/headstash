@@ -72,12 +72,21 @@ model Review {
   @@index([strainId])
 }
 
+enum TagKind {
+  EFFECT
+  TERPENE
+}
+
 model Tag {
   id        String   @id @default(cuid())
-  name      String   @unique
+  kind      TagKind  @default(EFFECT)
+  name      String
   createdAt DateTime @default(now())
 
   reviews ReviewTag[]
+
+  @@unique([kind, name])
+  @@index([kind])
 }
 
 model ReviewTag {
