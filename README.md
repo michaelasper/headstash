@@ -46,9 +46,14 @@ Expected env vars (see `.env.example`):
 
 - `DATABASE_URL` (SQLite connection string)
 
-## Validation (TODO)
+## Validation / constraints
 
-When we add the first create/update endpoints (Route Handlers or Server Actions), add minimal runtime validation at the request boundary for:
+Request-boundary validation lives in `src/app/actions.ts` (Server Actions) and is intentionally kept small:
 
-- `Review.rating` (ensure it maps to the `ReviewRating` enum)
-- `Strain.thcPct` / `Strain.cbdPct` (if used, ensure 0–100)
+- `Review.rating` must be one of Prisma enum `ReviewRating` (`ONE`–`FIVE`).
+- `Review.strainId` must be a `cuid()`.
+- `Review.consumedAt` is optional; when provided it must parse as a valid date.
+
+TODO (when we add fields/endpoints):
+
+- If we start accepting `Strain.thcPct` / `Strain.cbdPct`, validate 0–100.
