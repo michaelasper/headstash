@@ -45,6 +45,16 @@ npx prisma studio
 Expected env vars (see `.env.example`):
 
 - `DATABASE_URL` (SQLite connection string)
+- `AUTH_SECRET` (required in prod; dev default exists)
+- `AUTH_URL` (recommended; base URL for callbacks)
+
+Email magic link (optional SMTP; dev fallback logs magic link to console):
+
+- `EMAIL_SERVER_HOST`
+- `EMAIL_SERVER_PORT`
+- `EMAIL_SERVER_USER`
+- `EMAIL_SERVER_PASSWORD`
+- `EMAIL_FROM`
 
 ## Validation / constraints
 
