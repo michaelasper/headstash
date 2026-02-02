@@ -1,4 +1,5 @@
 import EmailProvider from "next-auth/providers/email";
+import GitHubProvider from "next-auth/providers/github";
 import type { NextAuthOptions } from "next-auth";
 
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
@@ -10,6 +11,14 @@ const hasSmtp = !!process.env.EMAIL_SERVER_HOST;
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
+    ...(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET
+      ? [
+          GitHubProvider({
+            clientId: process.env.GITHUB_CLIENT_ID,
+            clientSecret: process.env.GITHUB_CLIENT_SECRET,
+          }),
+        ]
+      : []),
     EmailProvider({
       // If SMTP is configured, use it. Otherwise, we still register the provider,
       // but override sendVerificationRequest to log the magic link (DEV ONLY).
