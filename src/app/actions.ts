@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { prisma } from "@/lib/prisma";
-import { ReviewRating, StrainType } from "@prisma/client";
+import { ReviewRating, StrainType, TagKind } from "@prisma/client";
 
 async function getOrCreateLocalUserId() {
   // No auth yet; use a stable local user so we can create reviews.
@@ -30,6 +30,30 @@ const createStrainSchema = z.object({
   // Keep this aligned with Prisma's StrainType enum.
   type: z.nativeEnum(StrainType).optional(),
 });
+
+const createTagSchema = z.object({
+  kind: z.nativeEnum(TagKind),
+  name: z.string().trim().min(1).max(60),
+});
+
+export async function createTag(formData: FormData) {
+  const parsed = createTagSchema.safeParse({
+    kind: formData.get("kind"),
+    name: formData.get("name"),
+  });
+
+  if (!parsed.success) throw new Error(parsed.error.message);
+
+  await prisma.tag.create({
+    data: {
+      kind: parsed.data.kind,
+      name: parsed.data.name,
+    },
+  });
+
+  revalidatePath("/tags");
+  redirect("/tags");
+}
 
 export async function createStrain(formData: FormData) {
   const parsed = createStrainSchema.safeParse({
@@ -62,6 +86,22 @@ const createReviewSchema = z.object({
   // Keep this aligned with Prisma's ReviewRating enum.
   rating: z.nativeEnum(ReviewRating),
 
+  // Optional tag ids (single-select for v1).
+  effectTagId: z
+    .string()
+    .optional()
+    .transform((v) => (v && v.length > 0 ? v : undefined))
+    .refine((v) => v === undefined || z.string().cuid().safeParse(v).success, {
+      message: "effectTagId must be a cuid",
+    }),
+  terpeneTagId: z
+    .string()
+    .optional()
+    .transform((v) => (v && v.length > 0 ? v : undefined))
+    .refine((v) => v === undefined || z.string().cuid().safeParse(v).success, {
+      message: "terpeneTagId must be a cuid",
+    }),
+
   // Accept empty string as undefined; validate date when provided.
   consumedAt: z
     .string()
@@ -83,6 +123,8 @@ export async function createReview(formData: FormData) {
   const parsed = createReviewSchema.safeParse({
     strainId: formData.get("strainId"),
     rating: formData.get("rating"),
+    effectTagId: formData.get("effectTagId"),
+    terpeneTagId: formData.get("terpeneTagId"),
     consumedAt: formData.get("consumedAt"),
     notes: formData.get("notes"),
   });
@@ -93,7 +135,7 @@ export async function createReview(formData: FormData) {
 
   const userId = await getOrCreateLocalUserId();
 
-  await prisma.review.create({
+  const review = await prisma.review.create({
     data: {
       userId,
       strainId: parsed.data.strainId,
@@ -101,7 +143,44 @@ export async function createReview(formData: FormData) {
       consumedAt: parsed.data.consumedAt,
       notes: parsed.data.notes,
     },
+    select: { id: true },
   });
+
+  const tagIds = [parsed.data.effectTagId, parsed.data.terpeneTagId].filter(
+    (v): v is string => !!v,
+  );
+
+  if (tagIds.length > 0) {
+    // Safety: ensure tags exist and match their expected kind.
+    const tags = await prisma.tag.findMany({
+      where: {
+        id: { in: tagIds },
+      },
+      select: { id: true, kind: true },
+    });
+
+    const byId = new Map(tags.map((t) => [t.id, t.kind] as const));
+
+    const toCreate: { reviewId: string; tagId: string }[] = [];
+    if (parsed.data.effectTagId) {
+      if (byId.get(parsed.data.effectTagId) !== TagKind.EFFECT) {
+        throw new Error("Selected effect tag is not an EFFECT tag");
+      }
+      toCreate.push({ reviewId: review.id, tagId: parsed.data.effectTagId });
+    }
+    if (parsed.data.terpeneTagId) {
+      if (byId.get(parsed.data.terpeneTagId) !== TagKind.TERPENE) {
+        throw new Error("Selected terpene tag is not a TERPENE tag");
+      }
+      toCreate.push({ reviewId: review.id, tagId: parsed.data.terpeneTagId });
+    }
+
+    if (toCreate.length > 0) {
+      await prisma.reviewTag.createMany({
+        data: toCreate,
+      });
+    }
+  }
 
   revalidatePath("/reviews");
   redirect("/reviews");
