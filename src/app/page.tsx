@@ -57,6 +57,12 @@ export default function Home() {
           >
             Manage tags (effects / terpenes)
           </Link>
+          <Link
+            href="/me"
+            className="rounded-lg border border-neutral-200 px-4 py-3 text-sm font-medium hover:bg-neutral-50"
+          >
+            Account (auth foundation)
+          </Link>
         </div>
       </section>
 

@@ -21,6 +21,10 @@ jobs:
       # Next build / server components may import Prisma.
       # Provide a throwaway SQLite DB path so Prisma can initialize during CI.
       DATABASE_URL: "file:./ci.db"
+      AUTH_SECRET: "ci-secret"
+      AUTH_URL: "http://localhost:3000"
+      NEXTAUTH_SECRET: "ci-secret"
+      NEXTAUTH_URL: "http://localhost:3000"
 
     steps:
       - name: Checkout
