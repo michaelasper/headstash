@@ -38,7 +38,7 @@ export function ButtonLink({
   return (
     <Link
       href={href}
-      className="rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm font-medium hover:bg-neutral-50"
+      className="rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium hover:bg-neutral-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-focus focus-visible:outline-offset-2"
     >
       {children}
     </Link>
@@ -53,9 +53,7 @@ export function Card({
   className?: string;
 }) {
   return (
-    <section
-      className={`rounded-xl border border-neutral-200 bg-white p-4 ${className}`}
-    >
+    <section className={`rounded-xl border border-border bg-card p-4 ${className}`}>
       {children}
     </section>
   );
