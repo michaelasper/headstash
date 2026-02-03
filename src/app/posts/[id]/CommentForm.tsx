@@ -29,7 +29,7 @@ export default function CommentForm({ postId }: { postId: string }) {
       <button
         type="submit"
         disabled={pending}
-        className="self-start rounded-lg bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-neutral-200"
+        className="self-start rounded-lg bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-focus focus-visible:outline-offset-2"
       >
         {pending ? "Posting…" : "Post comment"}
       </button>

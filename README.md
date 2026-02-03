@@ -117,6 +117,10 @@ npm run build
 npx prisma studio
 ```
 
+## Design tokens
+
+- See `docs/design-tokens.md` for the v0 design token layer (colors/type/spacing + focus ring).
+
 ## Environment
 
 Expected env vars (see `.env.example`):

@@ -104,7 +104,7 @@ export default async function PostsPage() {
             <p className="text-sm text-neutral-600">Sign in to create posts.</p>
             <Link
               href="/auth/signin"
-              className="rounded-lg bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 focus-visible:ring-2 focus-visible:ring-neutral-200"
+              className="rounded-lg bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-focus focus-visible:outline-offset-2"
             >
               Sign in
             </Link>
@@ -206,7 +206,7 @@ export default async function PostsPage() {
                               <input type="hidden" name="postId" value={p.id} />
                               <button
                                 type="submit"
-                                className={`rounded-lg px-3 py-1.5 text-sm font-medium focus-visible:ring-2 focus-visible:ring-neutral-200 ${
+                                className={`rounded-lg px-3 py-1.5 text-sm font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-focus focus-visible:outline-offset-2 ${
                                   liked
                                     ? "bg-neutral-900 text-white"
                                     : "border border-neutral-200 bg-white hover:bg-neutral-50"
@@ -220,7 +220,7 @@ export default async function PostsPage() {
                               <input type="hidden" name="postId" value={p.id} />
                               <button
                                 type="submit"
-                                className={`rounded-lg px-3 py-1.5 text-sm font-medium focus-visible:ring-2 focus-visible:ring-neutral-200 ${
+                                className={`rounded-lg px-3 py-1.5 text-sm font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-focus focus-visible:outline-offset-2 ${
                                   favorited
                                     ? "bg-neutral-900 text-white"
                                     : "border border-neutral-200 bg-white hover:bg-neutral-50"

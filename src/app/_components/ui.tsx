@@ -80,4 +80,4 @@ export function Field({
 }
 
 export const inputClassName =
-  "w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm outline-none focus:border-neutral-400 focus-visible:ring-2 focus-visible:ring-neutral-200";
+  "w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm outline-none focus:border-neutral-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-focus focus-visible:outline-offset-2";
