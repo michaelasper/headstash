@@ -76,6 +76,11 @@ Handle rules:
 - Like posts on `/posts` (auth required to like)
 - Shows like count + current user state
 
+### Favorites v0
+
+- Favorite posts on `/posts` and `/posts/[id]` (auth required)
+- View your favorites at `/me/favorites`
+
 ### Comments v0
 
 - Post detail page: `/posts/[id]`

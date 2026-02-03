@@ -66,6 +66,9 @@ export default async function MePage() {
             <Link href="/posts" className="text-neutral-600 hover:underline">
               Posts
             </Link>
+            <Link href="/me/favorites" className="text-neutral-600 hover:underline">
+              Favorites
+            </Link>
             <Link href="/search" className="text-neutral-600 hover:underline">
               Search
             </Link>

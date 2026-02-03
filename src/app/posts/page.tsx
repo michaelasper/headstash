@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { Card, Container, PageHeader } from "@/app/_components/ui";
 import PostComposer from "@/app/posts/postComposer";
 import { toggleLike } from "@/app/posts/reactions";
+import { toggleFavoritePost } from "@/app/posts/favorites";
 
 export const dynamic = "force-dynamic";
 
@@ -49,8 +50,11 @@ export default async function PostsPage() {
         where: { kind: "LIKE" },
         select: { userId: true },
       },
+      favorites: {
+        select: { userId: true },
+      },
       _count: {
-        select: { reactions: true, comments: true },
+        select: { reactions: true, comments: true, favorites: true },
       },
     },
   });
@@ -103,6 +107,9 @@ export default async function PostsPage() {
               const liked = viewer
                 ? p.reactions.some((r) => r.userId === viewer.id)
                 : false;
+              const favorited = viewer
+                ? p.favorites.some((f) => f.userId === viewer.id)
+                : false;
 
               return (
                 <li key={p.id} className="py-4">
@@ -143,25 +150,41 @@ export default async function PostsPage() {
 
                       <div className="mt-3 flex flex-wrap items-center gap-3">
                         {viewer ? (
-                          <form action={toggleLike}>
-                            <input type="hidden" name="postId" value={p.id} />
-                            <button
-                              type="submit"
-                              className={`rounded-lg px-3 py-1.5 text-sm font-medium focus-visible:ring-2 focus-visible:ring-neutral-200 ${
-                                liked
-                                  ? "bg-neutral-900 text-white"
-                                  : "border border-neutral-200 bg-white hover:bg-neutral-50"
-                              }`}
-                            >
-                              {liked ? "Liked" : "Like"}
-                            </button>
-                          </form>
+                          <>
+                            <form action={toggleLike}>
+                              <input type="hidden" name="postId" value={p.id} />
+                              <button
+                                type="submit"
+                                className={`rounded-lg px-3 py-1.5 text-sm font-medium focus-visible:ring-2 focus-visible:ring-neutral-200 ${
+                                  liked
+                                    ? "bg-neutral-900 text-white"
+                                    : "border border-neutral-200 bg-white hover:bg-neutral-50"
+                                }`}
+                              >
+                                {liked ? "Liked" : "Like"}
+                              </button>
+                            </form>
+
+                            <form action={toggleFavoritePost}>
+                              <input type="hidden" name="postId" value={p.id} />
+                              <button
+                                type="submit"
+                                className={`rounded-lg px-3 py-1.5 text-sm font-medium focus-visible:ring-2 focus-visible:ring-neutral-200 ${
+                                  favorited
+                                    ? "bg-neutral-900 text-white"
+                                    : "border border-neutral-200 bg-white hover:bg-neutral-50"
+                                }`}
+                              >
+                                {favorited ? "Favorited" : "Favorite"}
+                              </button>
+                            </form>
+                          </>
                         ) : (
                           <Link
                             href="/auth/signin"
                             className="text-sm font-medium text-neutral-900 underline"
                           >
-                            Sign in to like
+                            Sign in to react
                           </Link>
                         )}
 
@@ -173,7 +196,8 @@ export default async function PostsPage() {
                         </Link>
 
                         <div className="text-xs text-neutral-500">
-                          {p._count.reactions} like{p._count.reactions === 1 ? "" : "s"}
+                          {p._count.reactions} like{p._count.reactions === 1 ? "" : "s"} · {" "}
+                          {p._count.favorites} favorite{p._count.favorites === 1 ? "" : "s"}
                         </div>
                       </div>
                     </div>
