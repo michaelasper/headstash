@@ -5,7 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { Card, Container, PageHeader } from "@/app/_components/ui";
-import { markAllNotificationsRead } from "@/app/notifications/actions";
+import { markAllNotificationsRead, markNotificationRead } from "@/app/notifications/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +13,14 @@ export const metadata = {
   title: "Notifications",
 };
 
-export default async function NotificationsPage() {
+export default async function NotificationsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ marked?: string }>;
+}) {
+  const { marked } = await searchParams;
+  const justMarkedAll = marked === "1";
+
   const session = await getServerSession(authOptions);
   const email = session?.user?.email;
 
@@ -71,9 +78,7 @@ export default async function NotificationsPage() {
 
       <Card>
         <div className="flex items-center justify-between gap-4">
-          <div className="text-sm text-neutral-600">
-            Recent activity
-          </div>
+          <div className="text-sm text-neutral-600">Recent activity</div>
           <form action={markAllNotificationsRead}>
             <button
               type="submit"
@@ -83,6 +88,9 @@ export default async function NotificationsPage() {
             </button>
           </form>
         </div>
+        {justMarkedAll ? (
+          <p className="mt-3 text-sm text-neutral-600">Marked all as read.</p>
+        ) : null}
       </Card>
 
       <Card>
@@ -119,7 +127,22 @@ export default async function NotificationsPage() {
                       </div>
                     </div>
                     {!n.readAt ? (
-                      <span className="mt-1 inline-block h-2 w-2 rounded-full bg-neutral-900" />
+                      <div className="flex items-center gap-2">
+                        <span className="inline-block h-2 w-2 rounded-full bg-neutral-900" />
+                        <form action={markNotificationRead}>
+                          <input
+                            type="hidden"
+                            name="notificationId"
+                            value={n.id}
+                          />
+                          <button
+                            type="submit"
+                            className="text-xs font-medium text-neutral-900 underline"
+                          >
+                            Mark read
+                          </button>
+                        </form>
+                      </div>
                     ) : null}
                   </div>
                 </li>
