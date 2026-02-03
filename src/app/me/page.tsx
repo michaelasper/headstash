@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { handleSlug } from "@/lib/handles";
 import { Card, Container, PageHeader } from "@/app/_components/ui";
 
 export const dynamic = "force-dynamic";
@@ -57,7 +58,20 @@ export default async function MePage() {
 
   return (
     <Container>
-      <PageHeader title="Me" subtitle="Session info (auth foundation)." />
+      <PageHeader
+        title="Me"
+        subtitle={user.displayName ?? user.handle ?? "Session info"}
+        right={
+          <div className="flex gap-3 text-sm">
+            <Link href="/posts" className="text-neutral-600 hover:underline">
+              Posts
+            </Link>
+            <Link href="/search" className="text-neutral-600 hover:underline">
+              Search
+            </Link>
+          </div>
+        }
+      />
 
       <Card>
         <div className="text-sm">
@@ -75,7 +89,7 @@ export default async function MePage() {
             Edit profile
           </Link>
           <Link
-            href="/profile"
+            href={`/u/${handleSlug(user.handle)}`}
             className="rounded-lg border border-neutral-200 bg-white px-4 py-2 text-sm font-medium hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-neutral-200"
           >
             View public profile
