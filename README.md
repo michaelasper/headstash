@@ -56,6 +56,11 @@ No extra env vars required.
 - Follow/unfollow from public profiles: `/u/[handle]`
 - Shows follower/following counts
 
+### Reactions v0
+
+- Like posts on `/posts` (auth required to like)
+- Shows like count + current user state
+
 ### Avatar upload (dev-local only)
 
 DEV ONLY: uploading an avatar writes into `public/uploads/avatars/` and sets `avatarUrl` to a local path.
