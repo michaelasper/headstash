@@ -46,6 +46,11 @@ No extra env vars required.
 - Public profile: `/u/[handle]` (no auth required). Handle lookup is effectively case-insensitive because handles are stored lowercase.
 - Fields: `displayName`, `handle` (unique, @format), `bio`, `avatarUrl`, `links` (URLs)
 
+### Posts v0
+
+- View feed at `/posts` (public)
+- Creating a post requires sign-in
+
 ### Avatar upload (dev-local only)
 
 DEV ONLY: uploading an avatar writes into `public/uploads/avatars/` and sets `avatarUrl` to a local path.

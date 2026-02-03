@@ -27,6 +27,11 @@ enum ReviewRating {
   FIVE
 }
 
+enum TagKind {
+  EFFECT
+  TERPENE
+}
+
 model User {
   id          String   @id @default(cuid())
   email       String?  @unique
@@ -39,11 +44,12 @@ model User {
   updatedAt   DateTime @updatedAt
 
   // Auth.js (NextAuth) relations
-  accounts    Account[]
-  sessions    Session[]
-  credential  Credential?
+  accounts   Account[]
+  sessions   Session[]
+  credential Credential?
 
   reviews Review[]
+  posts   Post[]
 }
 
 model Account {
@@ -111,28 +117,41 @@ model Strain {
 }
 
 model Review {
-  id          String       @id @default(cuid())
-  rating      ReviewRating
-  notes       String?
-  consumedAt  DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String       @id @default(cuid())
+  rating     ReviewRating
+  notes      String?
+  consumedAt DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  userId   String
-  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   strainId String
   strain   Strain @relation(fields: [strainId], references: [id], onDelete: Cascade)
 
-  tags ReviewTag[]
+  tags  ReviewTag[]
+  posts Post[]
 
   @@index([userId])
   @@index([strainId])
 }
 
-enum TagKind {
-  EFFECT
-  TERPENE
+model Post {
+  id        String   @id @default(cuid())
+  body      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  reviewId String?
+  review   Review? @relation(fields: [reviewId], references: [id], onDelete: SetNull)
+
+  @@index([authorId])
+  @@index([createdAt])
+  @@index([reviewId])
 }
 
 model Tag {
@@ -148,8 +167,8 @@ model Tag {
 }
 
 model ReviewTag {
-  reviewId  String
-  tagId     String
+  reviewId   String
+  tagId      String
   assignedAt DateTime @default(now())
 
   review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
