@@ -61,6 +61,11 @@ No extra env vars required.
 - Like posts on `/posts` (auth required to like)
 - Shows like count + current user state
 
+### Comments v0
+
+- Post detail page: `/posts/[id]`
+- Commenting requires sign-in
+
 ### Avatar upload (dev-local only)
 
 DEV ONLY: uploading an avatar writes into `public/uploads/avatars/` and sets `avatarUrl` to a local path.

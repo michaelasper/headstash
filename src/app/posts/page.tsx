@@ -50,7 +50,7 @@ export default async function PostsPage() {
         select: { userId: true },
       },
       _count: {
-        select: { reactions: true },
+        select: { reactions: true, comments: true },
       },
     },
   });
@@ -130,7 +130,7 @@ export default async function PostsPage() {
                         {p.body}
                       </p>
 
-                      <div className="mt-3 flex items-center gap-3">
+                      <div className="mt-3 flex flex-wrap items-center gap-3">
                         {viewer ? (
                           <form action={toggleLike}>
                             <input type="hidden" name="postId" value={p.id} />
@@ -153,6 +153,13 @@ export default async function PostsPage() {
                             Sign in to like
                           </Link>
                         )}
+
+                        <Link
+                          href={`/posts/${p.id}`}
+                          className="text-sm font-medium text-neutral-900 underline"
+                        >
+                          View ({p._count.comments} comment{p._count.comments === 1 ? "" : "s"})
+                        </Link>
 
                         <div className="text-xs text-neutral-500">
                           {p._count.reactions} like{p._count.reactions === 1 ? "" : "s"}
