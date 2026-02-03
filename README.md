@@ -43,8 +43,14 @@ No extra env vars required.
 ### Profile MVP
 
 - Edit profile at `/profile` (requires sign-in)
-- Public profile: `/u/[handle]` (no auth required). Handle lookup is effectively case-insensitive because handles are stored lowercase.
+- Public profile: `/u/[handle]` (no auth required)
 - Fields: `displayName`, `handle` (unique, @format), `bio`, `avatarUrl`, `links` (URLs)
+
+Handle rules:
+- Stored in canonical form: lowercase, always prefixed with `@`
+- Allowed chars: `a-z`, `0-9`, `_`
+- Length: 3–20 characters (including `@`)
+- Reserved handles are blocked (e.g. `@admin`, `@auth`, `@api`, `@posts`, `@u`, ...)
 
 ### Posts v0
 
