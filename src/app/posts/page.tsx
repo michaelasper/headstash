@@ -6,6 +6,7 @@ import { authOptions } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { Card, Container, PageHeader } from "@/app/_components/ui";
 import PostComposer from "@/app/posts/postComposer";
+import FeedTabs from "@/app/posts/_components/FeedTabs";
 import { toggleLike } from "@/app/posts/reactions";
 import { toggleFavoritePost } from "@/app/posts/favorites";
 
@@ -65,9 +66,12 @@ export default async function PostsPage() {
         title="Posts"
         subtitle="A simple feed (v0)."
         right={
-          <Link href="/" className="text-sm text-neutral-600 hover:underline">
-            Home
-          </Link>
+          <div className="flex items-center gap-3">
+            <FeedTabs active="global" />
+            <Link href="/" className="text-sm text-neutral-600 hover:underline">
+              Home
+            </Link>
+          </div>
         }
       />
 
