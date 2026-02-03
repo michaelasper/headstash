@@ -62,6 +62,10 @@ Handle rules:
 - Search users and posts at `/search`
 - Simple substring matching (SQLite, no full-text search)
 
+### Onboarding v0
+
+- Signed-in users without a handle are prompted from `/me` to complete onboarding at `/onboarding`.
+
 ### Follow v0
 
 - Follow/unfollow from public profiles: `/u/[handle]`

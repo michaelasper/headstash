@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/auth";
+import { prisma } from "@/lib/prisma";
 import { Card, Container, PageHeader } from "@/app/_components/ui";
 
 export const dynamic = "force-dynamic";
@@ -14,7 +15,7 @@ export const metadata = {
 export default async function MePage() {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user) {
+  if (!session?.user?.email) {
     return (
       <Container>
         <PageHeader title="Me" subtitle="You are not signed in." />
@@ -24,6 +25,30 @@ export default async function MePage() {
             className="rounded-lg bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 focus-visible:ring-2 focus-visible:ring-neutral-200"
           >
             Sign in
+          </Link>
+        </Card>
+      </Container>
+    );
+  }
+
+  const email = session.user.email.toLowerCase();
+  const user = await prisma.user.findUnique({
+    where: { email },
+    select: { handle: true, displayName: true },
+  });
+
+  // Onboarding trigger: nudge users to set a handle (required for public profile).
+  // Avoid redirect loops by not applying this guard to /onboarding.
+  if (!user?.handle) {
+    return (
+      <Container>
+        <PageHeader title="Welcome" subtitle="Let’s set up your profile." />
+        <Card>
+          <Link
+            href="/onboarding"
+            className="rounded-lg bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 focus-visible:ring-2 focus-visible:ring-neutral-200"
+          >
+            Continue onboarding
           </Link>
         </Card>
       </Container>
