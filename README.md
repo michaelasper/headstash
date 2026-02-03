@@ -4,6 +4,10 @@ Mobile-friendly web app for logging cannabis strain reviews.
 
 ## Prereqs
 
+## UI foundations
+
+- See `docs/design.md` for semantic tokens + focus ring + typography/spacing guidance.
+
 - Node.js 20+
 - npm
 
