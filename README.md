@@ -83,6 +83,11 @@ Handle rules:
 - Favorite posts on `/posts` and `/posts/[id]` (auth required)
 - View your favorites at `/me/favorites`
 
+### Notifications v0
+
+- In-app notifications at `/notifications` (auth required)
+- Events: follow, like your post, comment on your post
+
 ### Comments v0
 
 - Post detail page: `/posts/[id]`

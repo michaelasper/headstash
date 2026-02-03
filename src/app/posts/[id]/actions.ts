@@ -38,15 +38,34 @@ export async function createComment(
   });
   if (!user) return { error: "User not found." };
 
-  await prisma.comment.create({
+  const comment = await prisma.comment.create({
     data: {
       postId: parsed.data.postId,
       authorId: user.id,
       body: parsed.data.body,
     },
+    select: { id: true },
   });
+
+  // Notify post author (avoid self-notify).
+  const post = await prisma.post.findUnique({
+    where: { id: parsed.data.postId },
+    select: { authorId: true },
+  });
+  if (post && post.authorId !== user.id) {
+    await prisma.notification.create({
+      data: {
+        userId: post.authorId,
+        actorUserId: user.id,
+        type: "COMMENT_POST",
+        postId: parsed.data.postId,
+        commentId: comment.id,
+      },
+    });
+  }
 
   revalidatePath("/posts");
   revalidatePath(`/posts/${parsed.data.postId}`);
+  revalidatePath("/notifications");
   redirect(`/posts/${parsed.data.postId}`);
 }
