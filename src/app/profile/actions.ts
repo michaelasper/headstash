@@ -8,17 +8,27 @@ import { getServerSession } from "next-auth";
 
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/auth";
+import {
+  HANDLE_MAX,
+  HANDLE_MIN,
+  RESERVED_HANDLES,
+  handleSlug,
+  normalizeHandle,
+} from "@/lib/handles";
 
 const handleSchema = z
   .string()
   .trim()
-  .transform((v) => v.toLowerCase())
+  .transform((v) => normalizeHandle(v))
   .refine((v) => v.startsWith("@"), { message: "Handle must start with @" })
   .refine((v) => /^@[a-z0-9_]+$/.test(v), {
     message: "Handle can contain only letters, numbers, and underscores",
   })
-  .refine((v) => v.length >= 3 && v.length <= 20, {
-    message: "Handle must be 3–20 characters (including @)",
+  .refine((v) => v.length >= HANDLE_MIN && v.length <= HANDLE_MAX, {
+    message: `Handle must be ${HANDLE_MIN}–${HANDLE_MAX} characters (including @)`,
+  })
+  .refine((v) => !RESERVED_HANDLES.has(handleSlug(v)), {
+    message: "That handle is reserved",
   });
 
 const urlSchema = z
