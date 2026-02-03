@@ -54,7 +54,8 @@ Handle rules:
 
 ### Posts v0
 
-- View feed at `/posts` (public)
+- Global feed: `/posts` (public)
+- Following feed: `/posts/following` (requires sign-in)
 - Creating a post requires sign-in
 
 ### Search v0
