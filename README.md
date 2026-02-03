@@ -57,6 +57,11 @@ Handle rules:
 - View feed at `/posts` (public)
 - Creating a post requires sign-in
 
+### Search v0
+
+- Search users and posts at `/search`
+- Simple substring matching (SQLite, no full-text search)
+
 ### Follow v0
 
 - Follow/unfollow from public profiles: `/u/[handle]`
