@@ -35,8 +35,14 @@ export default async function MePage() {
   const email = session.user.email.toLowerCase();
   const user = await prisma.user.findUnique({
     where: { email },
-    select: { handle: true, displayName: true },
+    select: { id: true, handle: true, displayName: true },
   });
+
+  const unreadCount = user
+    ? await prisma.notification.count({
+        where: { userId: user.id, readAt: null },
+      })
+    : 0;
 
   // Onboarding trigger: nudge users to set a handle (required for public profile).
   // Avoid redirect loops by not applying this guard to /onboarding.
@@ -69,8 +75,16 @@ export default async function MePage() {
             <Link href="/me/favorites" className="text-neutral-600 hover:underline">
               Favorites
             </Link>
-            <Link href="/notifications" className="text-neutral-600 hover:underline">
-              Notifications
+            <Link
+              href="/notifications"
+              className="flex items-center gap-1 text-neutral-600 hover:underline"
+            >
+              <span>Notifications</span>
+              {unreadCount > 0 ? (
+                <span className="rounded-full bg-neutral-900 px-1.5 py-0.5 text-[10px] font-semibold leading-none text-white">
+                  {unreadCount}
+                </span>
+              ) : null}
             </Link>
             <Link href="/search" className="text-neutral-600 hover:underline">
               Search
