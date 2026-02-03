@@ -41,22 +41,29 @@ export async function followUser(formData: FormData) {
   if (!target) throw new Error("Target not found");
   if (me.id === target.id) throw new Error("Cannot follow yourself");
 
-  const created = await prisma.follow.upsert({
-    where: { followerId_followingId: { followerId: me.id, followingId: target.id } },
-    update: {},
-    create: { followerId: me.id, followingId: target.id },
+  const where = { followerId_followingId: { followerId: me.id, followingId: target.id } };
+
+  // Only notify on a *new* follow.
+  const existing = await prisma.follow.findUnique({
+    where,
     select: { followerId: true },
   });
 
-  // Notify the followed user (avoid self-notify).
-  if (me.id !== target.id && created) {
-    await prisma.notification.create({
-      data: {
-        userId: target.id,
-        actorUserId: me.id,
-        type: "FOLLOW",
-      },
+  if (!existing) {
+    await prisma.follow.create({
+      data: { followerId: me.id, followingId: target.id },
     });
+
+    // Notify the followed user (avoid self-notify).
+    if (me.id !== target.id) {
+      await prisma.notification.create({
+        data: {
+          userId: target.id,
+          actorUserId: me.id,
+          type: "FOLLOW",
+        },
+      });
+    }
   }
 
   revalidatePath(`/u/${targetHandle.replace(/^@/, "")}`);
