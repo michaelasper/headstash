@@ -91,7 +91,7 @@ export default async function PostsPage() {
         }
       />
 
-      <Card>
+      <Card className="p-3">
         {session?.user?.email ? (
           <PostComposer
             reviews={reviews.map((r) => ({
@@ -112,7 +112,7 @@ export default async function PostsPage() {
         )}
       </Card>
 
-      <Card>
+      <Card className="p-3">
         {posts.length === 0 ? (
           <div className="flex flex-col gap-3">
             <p className="text-sm text-neutral-600">No posts yet.</p>
@@ -169,7 +169,7 @@ export default async function PostsPage() {
                         </div>
                       </div>
 
-                      <p className="mt-2 whitespace-pre-wrap text-sm text-neutral-800">
+                      <p className="mt-2 max-w-[68ch] whitespace-pre-wrap text-sm text-neutral-800">
                         {p.body}
                       </p>
 

@@ -140,7 +140,7 @@ export default async function PostDetailPage({
               </div>
             </div>
 
-            <p className="mt-2 whitespace-pre-wrap text-sm text-neutral-800">
+            <p className="mt-2 max-w-[68ch] whitespace-pre-wrap text-sm text-neutral-800">
               {post.body}
             </p>
 

@@ -76,7 +76,7 @@ export default async function NotificationsPage({
         }
       />
 
-      <Card>
+      <Card className="p-3">
         <div className="flex items-center justify-between gap-4">
           <div className="text-sm text-neutral-600">Recent activity</div>
           <form action={markAllNotificationsRead}>
@@ -93,7 +93,7 @@ export default async function NotificationsPage({
         ) : null}
       </Card>
 
-      <Card>
+      <Card className="p-3">
         {notifications.length === 0 ? (
           <p className="text-sm text-neutral-600">No notifications yet.</p>
         ) : (

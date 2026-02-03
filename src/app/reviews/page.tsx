@@ -104,7 +104,7 @@ export default async function ReviewsPage({
         />
       </div>
 
-      <Card>
+      <Card className="p-3">
         <form className="flex flex-col gap-4" method="get">
           <label className="flex flex-col gap-1 text-sm">
             <span className="font-medium">Search</span>
@@ -193,7 +193,7 @@ export default async function ReviewsPage({
         </form>
       </Card>
 
-      <Card>
+      <Card className="p-3">
         {reviews.length === 0 ? (
           <div className="flex flex-col gap-3">
             <p className="text-sm text-neutral-600">
