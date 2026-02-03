@@ -7,17 +7,13 @@ import { authOptions } from "@/auth";
 import { followUser, unfollowUser } from "@/app/follow/actions";
 import { prisma } from "@/lib/prisma";
 import { Card, Container, PageHeader } from "@/app/_components/ui";
+import { normalizeHandle } from "@/lib/handles";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Profile",
 };
-
-function normalizeHandle(raw: string) {
-  const h = raw.trim().toLowerCase();
-  return h.startsWith("@") ? h : `@${h}`;
-}
 
 export default async function PublicProfilePage({
   params,
