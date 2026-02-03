@@ -7,6 +7,7 @@ import { authOptions } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { Card, Container, PageHeader } from "@/app/_components/ui";
 import CommentForm from "@/app/posts/[id]/CommentForm";
+import { toggleFavoritePost } from "@/app/posts/favorites";
 
 export const dynamic = "force-dynamic";
 
@@ -31,13 +32,19 @@ export default async function PostDetailPage({
 
   const session = await getServerSession(authOptions);
 
+  const viewerEmail = session?.user?.email?.toLowerCase() ?? null;
+  const viewer = viewerEmail
+    ? await prisma.user.findUnique({ where: { email: viewerEmail }, select: { id: true } })
+    : null;
+
   const post = await prisma.post.findUnique({
     where: { id },
     include: {
       author: {
         select: { displayName: true, handle: true, email: true, avatarUrl: true },
       },
-      _count: { select: { reactions: true, comments: true } },
+      favorites: viewer ? { where: { userId: viewer.id }, select: { id: true } } : false,
+      _count: { select: { reactions: true, comments: true, favorites: true } },
       comments: {
         orderBy: [{ createdAt: "asc" }],
         include: {
@@ -98,9 +105,37 @@ export default async function PostDetailPage({
               {post.body}
             </p>
 
-            <div className="mt-3 text-xs text-neutral-500">
-              {post._count.reactions} like{post._count.reactions === 1 ? "" : "s"} · {" "}
-              {post._count.comments} comment{post._count.comments === 1 ? "" : "s"}
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              {viewer ? (
+                <form action={toggleFavoritePost}>
+                  <input type="hidden" name="postId" value={post.id} />
+                  <button
+                    type="submit"
+                    className={`rounded-lg px-3 py-1.5 text-sm font-medium focus-visible:ring-2 focus-visible:ring-neutral-200 ${
+                      post.favorites && post.favorites.length > 0
+                        ? "bg-neutral-900 text-white"
+                        : "border border-neutral-200 bg-white hover:bg-neutral-50"
+                    }`}
+                  >
+                    {post.favorites && post.favorites.length > 0
+                      ? "Favorited"
+                      : "Favorite"}
+                  </button>
+                </form>
+              ) : (
+                <Link
+                  href="/auth/signin"
+                  className="text-sm font-medium text-neutral-900 underline"
+                >
+                  Sign in to favorite
+                </Link>
+              )}
+
+              <div className="text-xs text-neutral-500">
+                {post._count.reactions} like{post._count.reactions === 1 ? "" : "s"} · {" "}
+                {post._count.comments} comment{post._count.comments === 1 ? "" : "s"} · {" "}
+                {post._count.favorites} favorite{post._count.favorites === 1 ? "" : "s"}
+              </div>
             </div>
           </div>
         </div>
