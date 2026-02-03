@@ -134,5 +134,7 @@ export async function updateProfile(
   }
 
   revalidatePath("/profile");
-  redirect("/profile");
+  revalidatePath("/me");
+  revalidatePath("/onboarding");
+  redirect("/me");
 }
