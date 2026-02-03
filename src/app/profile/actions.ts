@@ -136,5 +136,6 @@ export async function updateProfile(
   revalidatePath("/profile");
   revalidatePath("/me");
   revalidatePath("/onboarding");
+  if (parsed.data.handle) revalidatePath(`/u/${parsed.data.handle.replace(/^@/, "")}`);
   redirect("/me");
 }

@@ -85,7 +85,18 @@ export default async function PostsPage() {
 
       <Card>
         {posts.length === 0 ? (
-          <p className="text-sm text-neutral-600">No posts yet.</p>
+          <div className="flex flex-col gap-3">
+            <p className="text-sm text-neutral-600">No posts yet.</p>
+            {session?.user?.email ? (
+              <p className="text-xs text-neutral-500">
+                Write the first one above — short notes, strain takes, anything.
+              </p>
+            ) : (
+              <p className="text-xs text-neutral-500">
+                Sign in to create the first post.
+              </p>
+            )}
+          </div>
         ) : (
           <ul className="divide-y divide-neutral-200">
             {posts.map((p) => {
