@@ -64,6 +64,12 @@ export default function Home() {
             Posts (feed)
           </Link>
           <Link
+            href="/search"
+            className="rounded-lg border border-neutral-200 px-4 py-3 text-sm font-medium hover:bg-neutral-50"
+          >
+            Search
+          </Link>
+          <Link
             href="/me"
             className="rounded-lg border border-neutral-200 px-4 py-3 text-sm font-medium hover:bg-neutral-50"
           >
