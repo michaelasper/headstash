@@ -6,6 +6,7 @@ import { authOptions } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { Card, Container, PageHeader } from "@/app/_components/ui";
 import PostComposer from "@/app/posts/postComposer";
+import { toggleLike } from "@/app/posts/reactions";
 
 export const dynamic = "force-dynamic";
 
@@ -13,12 +14,24 @@ export const metadata = {
   title: "Posts",
 };
 
-function displayName(u: { displayName: string | null; handle: string | null; email: string | null }) {
+function displayName(u: {
+  displayName: string | null;
+  handle: string | null;
+  email: string | null;
+}) {
   return u.displayName ?? u.handle ?? u.email ?? "Anonymous";
 }
 
 export default async function PostsPage() {
   const session = await getServerSession(authOptions);
+  const viewerEmail = session?.user?.email?.toLowerCase() ?? null;
+
+  const viewer = viewerEmail
+    ? await prisma.user.findUnique({
+        where: { email: viewerEmail },
+        select: { id: true },
+      })
+    : null;
 
   const posts = await prisma.post.findMany({
     orderBy: [{ createdAt: "desc" }],
@@ -31,6 +44,13 @@ export default async function PostsPage() {
           email: true,
           avatarUrl: true,
         },
+      },
+      reactions: {
+        where: { kind: "LIKE" },
+        select: { userId: true },
+      },
+      _count: {
+        select: { reactions: true },
       },
     },
   });
@@ -52,9 +72,7 @@ export default async function PostsPage() {
           <PostComposer />
         ) : (
           <div className="flex items-center justify-between gap-4">
-            <p className="text-sm text-neutral-600">
-              Sign in to create posts.
-            </p>
+            <p className="text-sm text-neutral-600">Sign in to create posts.</p>
             <Link
               href="/auth/signin"
               className="rounded-lg bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 focus-visible:ring-2 focus-visible:ring-neutral-200"
@@ -70,43 +88,81 @@ export default async function PostsPage() {
           <p className="text-sm text-neutral-600">No posts yet.</p>
         ) : (
           <ul className="divide-y divide-neutral-200">
-            {posts.map((p) => (
-              <li key={p.id} className="py-4">
-                <div className="flex items-start gap-3">
-                  <div className="h-10 w-10 overflow-hidden rounded-full border border-neutral-200 bg-neutral-100">
-                    {p.author.avatarUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={p.author.avatarUrl}
-                        alt=""
-                        className="h-full w-full object-cover"
-                      />
-                    ) : null}
-                  </div>
+            {posts.map((p) => {
+              const liked = viewer
+                ? p.reactions.some((r) => r.userId === viewer.id)
+                : false;
 
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-baseline justify-between gap-3">
-                      <div className="truncate text-sm font-medium">
-                        {p.author.handle ? (
-                          <Link href={`/u/${p.author.handle.replace(/^@/, "")}`} className="hover:underline">
-                            {displayName(p.author)}
-                          </Link>
-                        ) : (
-                          displayName(p.author)
-                        )}
-                      </div>
-                      <div className="shrink-0 text-xs text-neutral-500">
-                        {p.createdAt.toLocaleString()}
-                      </div>
+              return (
+                <li key={p.id} className="py-4">
+                  <div className="flex items-start gap-3">
+                    <div className="h-10 w-10 overflow-hidden rounded-full border border-neutral-200 bg-neutral-100">
+                      {p.author.avatarUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={p.author.avatarUrl}
+                          alt=""
+                          className="h-full w-full object-cover"
+                        />
+                      ) : null}
                     </div>
 
-                    <p className="mt-2 whitespace-pre-wrap text-sm text-neutral-800">
-                      {p.body}
-                    </p>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-baseline justify-between gap-3">
+                        <div className="truncate text-sm font-medium">
+                          {p.author.handle ? (
+                            <Link
+                              href={`/u/${p.author.handle.replace(/^@/, "")}`}
+                              className="hover:underline"
+                            >
+                              {displayName(p.author)}
+                            </Link>
+                          ) : (
+                            displayName(p.author)
+                          )}
+                        </div>
+                        <div className="shrink-0 text-xs text-neutral-500">
+                          {p.createdAt.toLocaleString()}
+                        </div>
+                      </div>
+
+                      <p className="mt-2 whitespace-pre-wrap text-sm text-neutral-800">
+                        {p.body}
+                      </p>
+
+                      <div className="mt-3 flex items-center gap-3">
+                        {viewer ? (
+                          <form action={toggleLike}>
+                            <input type="hidden" name="postId" value={p.id} />
+                            <button
+                              type="submit"
+                              className={`rounded-lg px-3 py-1.5 text-sm font-medium focus-visible:ring-2 focus-visible:ring-neutral-200 ${
+                                liked
+                                  ? "bg-neutral-900 text-white"
+                                  : "border border-neutral-200 bg-white hover:bg-neutral-50"
+                              }`}
+                            >
+                              {liked ? "Liked" : "Like"}
+                            </button>
+                          </form>
+                        ) : (
+                          <Link
+                            href="/auth/signin"
+                            className="text-sm font-medium text-neutral-900 underline"
+                          >
+                            Sign in to like
+                          </Link>
+                        )}
+
+                        <div className="text-xs text-neutral-500">
+                          {p._count.reactions} like{p._count.reactions === 1 ? "" : "s"}
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
         )}
       </Card>
