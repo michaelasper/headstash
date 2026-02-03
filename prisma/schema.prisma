@@ -51,6 +51,7 @@ model User {
   reviews Review[]
   posts      Post[]
   reactions  Reaction[]
+  favorites  Favorite[]
   comments   Comment[]
 
   following Follow[] @relation("Following")
@@ -155,6 +156,7 @@ model Post {
   review   Review? @relation(fields: [reviewId], references: [id], onDelete: SetNull)
 
   reactions Reaction[]
+  favorites Favorite[]
   comments  Comment[]
 
   @@index([authorId])
@@ -178,6 +180,21 @@ model Reaction {
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([postId, userId, kind])
+  @@index([postId])
+  @@index([userId])
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  postId String
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
   @@index([postId])
   @@index([userId])
 }
