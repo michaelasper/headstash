@@ -35,9 +35,18 @@ export default async function PostsPage() {
       })
     : null;
 
-  const posts = await prisma.post.findMany({
-    orderBy: [{ createdAt: "desc" }],
-    take: 100,
+  const [reviews, posts] = await Promise.all([
+    viewer
+      ? prisma.review.findMany({
+          where: { userId: viewer.id },
+          orderBy: [{ createdAt: "desc" }],
+          take: 50,
+          include: { strain: true },
+        })
+      : Promise.resolve([]),
+    prisma.post.findMany({
+      orderBy: [{ createdAt: "desc" }],
+      take: 100,
     include: {
       author: {
         select: {
@@ -54,11 +63,18 @@ export default async function PostsPage() {
       favorites: {
         select: { userId: true },
       },
+      review: {
+        include: {
+          strain: true,
+          user: { select: { id: true } },
+        },
+      },
       _count: {
         select: { reactions: true, comments: true, favorites: true },
       },
     },
-  });
+  }),
+  ]);
 
   return (
     <Container>
@@ -77,7 +93,12 @@ export default async function PostsPage() {
 
       <Card>
         {session?.user?.email ? (
-          <PostComposer />
+          <PostComposer
+            reviews={reviews.map((r) => ({
+              id: r.id,
+              label: `${r.strain.name} · ${r.rating}`,
+            }))}
+          />
         ) : (
           <div className="flex items-center justify-between gap-4">
             <p className="text-sm text-neutral-600">Sign in to create posts.</p>
@@ -151,6 +172,32 @@ export default async function PostsPage() {
                       <p className="mt-2 whitespace-pre-wrap text-sm text-neutral-800">
                         {p.body}
                       </p>
+
+                      {p.review ? (
+                        <div className="mt-3 rounded-lg border border-neutral-200 bg-neutral-50 p-3">
+                          <div className="text-sm font-medium">
+                            {p.review.strain.name} · {p.review.rating}
+                          </div>
+                          <div className="mt-1 text-xs text-neutral-600">
+                            {p.review.consumedAt
+                              ? p.review.consumedAt.toLocaleDateString()
+                              : "(no date)"}
+                          </div>
+                          {p.review.notes ? (
+                            <div className="mt-2 line-clamp-3 whitespace-pre-wrap text-sm text-neutral-700">
+                              {p.review.notes}
+                            </div>
+                          ) : null}
+                          <div className="mt-2">
+                            <Link
+                              href={`/reviews/${p.review.id}/edit`}
+                              className="text-xs font-medium text-neutral-900 underline"
+                            >
+                              View review
+                            </Link>
+                          </div>
+                        </div>
+                      ) : null}
 
                       <div className="mt-3 flex flex-wrap items-center gap-3">
                         {viewer ? (
