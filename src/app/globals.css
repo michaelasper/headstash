@@ -14,10 +14,13 @@
   /* Semantic colors */
   --bg: #ffffff;
   --fg: #111827;
-  --muted: #6b7280;
+  /* Muted text + muted surface */
+  --muted-fg: #6b7280;
+  --muted: #f3f4f6;
   --card: #ffffff;
   --border: #e5e7eb;
   --shadow: rgba(17, 24, 39, 0.08);
+  --hover: rgba(17, 24, 39, 0.04);
 
   --primary: #111827;
   --accent: #111827;
@@ -46,9 +49,11 @@
   --color-background: var(--bg);
   --color-foreground: var(--fg);
   --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-fg);
   --color-card: var(--card);
   --color-border: var(--border);
   --color-shadow: var(--shadow);
+  --color-hover: var(--hover);
 
   --color-primary: var(--primary);
   --color-accent: var(--accent);
@@ -66,10 +71,12 @@
   :root {
     --bg: #0b0b0c;
     --fg: #f3f4f6;
-    --muted: #9ca3af;
+    --muted-fg: #9ca3af;
+    --muted: #18181b;
     --card: #0f1012;
     --border: #27272a;
     --shadow: rgba(0, 0, 0, 0.5);
+    --hover: rgba(255, 255, 255, 0.06);
 
     --primary: #f3f4f6;
     --accent: #f3f4f6;
@@ -91,6 +98,12 @@ body {
   font-family: var(--font-sans);
   line-height: var(--lh-body);
   text-rendering: optimizeLegibility;
+}
+
+/* Global focus ring: always visible and consistent */
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
 
 /* Respect reduced motion */
