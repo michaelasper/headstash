@@ -57,6 +57,7 @@ Handle rules:
 - Global feed: `/posts` (public)
 - Following feed: `/posts/following` (requires sign-in)
 - Creating a post requires sign-in
+- Posts can optionally attach a review (v0)
 
 ### Search v0
 
