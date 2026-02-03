@@ -46,7 +46,24 @@ export async function toggleLike(formData: FormData) {
         kind: "LIKE",
       },
     });
+
+    // Notify post author (avoid self-notify).
+    const post = await prisma.post.findUnique({
+      where: { id: parsed.data.postId },
+      select: { authorId: true },
+    });
+    if (post && post.authorId !== user.id) {
+      await prisma.notification.create({
+        data: {
+          userId: post.authorId,
+          actorUserId: user.id,
+          type: "LIKE_POST",
+          postId: parsed.data.postId,
+        },
+      });
+    }
   }
 
   revalidatePath("/posts");
+  revalidatePath("/notifications");
 }
