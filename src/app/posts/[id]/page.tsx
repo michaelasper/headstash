@@ -9,6 +9,42 @@ import { Card, Container, PageHeader } from "@/app/_components/ui";
 import CommentForm from "@/app/posts/[id]/CommentForm";
 import { toggleFavoritePost } from "@/app/posts/favorites";
 
+function ReviewCard({
+  review,
+}: {
+  review: {
+    id: string;
+    rating: string;
+    consumedAt: Date | null;
+    notes: string | null;
+    strain: { name: string };
+  };
+}) {
+  return (
+    <div className="mt-3 rounded-lg border border-neutral-200 bg-neutral-50 p-3">
+      <div className="text-sm font-medium">
+        {review.strain.name} · {review.rating}
+      </div>
+      <div className="mt-1 text-xs text-neutral-600">
+        {review.consumedAt ? review.consumedAt.toLocaleDateString() : "(no date)"}
+      </div>
+      {review.notes ? (
+        <div className="mt-2 line-clamp-3 whitespace-pre-wrap text-sm text-neutral-700">
+          {review.notes}
+        </div>
+      ) : null}
+      <div className="mt-2">
+        <Link
+          href={`/reviews/${review.id}/edit`}
+          className="text-xs font-medium text-neutral-900 underline"
+        >
+          View review
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 export const dynamic = "force-dynamic";
 
 export const metadata = {
@@ -45,6 +81,9 @@ export default async function PostDetailPage({
       },
       favorites: viewer ? { where: { userId: viewer.id }, select: { id: true } } : false,
       _count: { select: { reactions: true, comments: true, favorites: true } },
+      review: {
+        include: { strain: true },
+      },
       comments: {
         orderBy: [{ createdAt: "asc" }],
         include: {
@@ -104,6 +143,8 @@ export default async function PostDetailPage({
             <p className="mt-2 whitespace-pre-wrap text-sm text-neutral-800">
               {post.body}
             </p>
+
+            {post.review ? <ReviewCard review={post.review} /> : null}
 
             <div className="mt-3 flex flex-wrap items-center gap-3">
               {viewer ? (
