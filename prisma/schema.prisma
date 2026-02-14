@@ -165,6 +165,7 @@ model Post {
 
   @@index([authorId])
   @@index([createdAt])
+  @@index([createdAt, id])
   @@index([reviewId])
 }
 

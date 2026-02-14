@@ -39,7 +39,7 @@ export default async function SearchPage({
           ],
         },
         take: 20,
-        orderBy: [{ createdAt: "desc" }],
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
         include: {
           author: { select: { displayName: true, handle: true, avatarUrl: true, email: true } },
         },

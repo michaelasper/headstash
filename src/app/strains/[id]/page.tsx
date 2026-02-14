@@ -25,7 +25,7 @@ export default async function StrainDetailPage({
 
   const reviews = await prisma.review.findMany({
     where: { strainId: id },
-    orderBy: [{ createdAt: "desc" }],
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     take: 50,
   });
 

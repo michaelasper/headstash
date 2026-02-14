@@ -111,7 +111,7 @@ async function FollowingPostsList({
 }) {
   const posts = await prisma.post.findMany({
     where: { authorId: { in: followingIds } },
-    orderBy: [{ createdAt: "desc" }],
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     take: 50,
     include: {
       author: {
