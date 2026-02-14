@@ -22,13 +22,13 @@ export default function PostComposer({
 
   return (
     <form action={action} className="flex flex-col gap-3">
-      <Field label="New post">
+      <Field label="Write a post">
         <textarea
           name="body"
           required
           rows={4}
           className={inputClassName}
-          placeholder="What’s on your mind?"
+          placeholder="Share a strain take, quick review, or note…"
         />
       </Field>
 

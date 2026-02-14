@@ -19,7 +19,7 @@ export default async function OnboardingPage() {
   if (!session?.user?.email) {
     return (
       <Container>
-        <PageHeader title="Onboarding" subtitle="Sign in to continue." />
+        <PageHeader title="Set up your profile" subtitle="Sign in to continue." />
         <Link
           href="/auth/signin"
           className="rounded-lg bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 focus-visible:ring-2 focus-visible:ring-neutral-200"
@@ -51,7 +51,7 @@ export default async function OnboardingPage() {
     <Container>
       <PageHeader
         title="Welcome"
-        subtitle="Set your handle and basic profile to get started."
+        subtitle="Pick your handle and basic profile details to get started."
         right={
           <Link href="/me" className="text-sm text-neutral-600 hover:underline">
             Skip
@@ -70,7 +70,7 @@ export default async function OnboardingPage() {
       />
 
       <p className="text-xs text-neutral-500">
-        Tip: your public profile URL is based on your handle.
+        Tip: your profile link uses your handle (for example, `/u/yourname`).
       </p>
     </Container>
   );
