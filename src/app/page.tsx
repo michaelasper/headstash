@@ -9,7 +9,7 @@ export default function Home() {
       <header className="flex flex-col gap-2">
         <h1 className="text-h1">Headstash</h1>
         <p className="text-sm text-muted-foreground">
-          A simple, mobile-first stash for cannabis strain reviews.
+          Track strains, share takes, and find trusted cannabis reviews.
         </p>
       </header>
 
@@ -38,7 +38,7 @@ export default function Home() {
           </button>
         </form>
         <p className="mt-2 text-xs text-muted-foreground">
-          Tip: filter by Effect / Terpene on the Reviews page.
+          Tip: use effect and terpene filters on the Reviews page.
         </p>
       </section>
 
@@ -55,7 +55,7 @@ export default function Home() {
             href="/reviews"
             className="rounded-md border border-border px-4 py-3 text-sm font-medium hover:bg-hover"
           >
-            View reviews (search + filters)
+            Browse reviews
           </Link>
           <Link
             href="/strains"
@@ -67,13 +67,13 @@ export default function Home() {
             href="/tags"
             className="rounded-md border border-border px-4 py-3 text-sm font-medium hover:bg-hover"
           >
-            Manage tags (effects / terpenes)
+            Manage effect & terpene tags
           </Link>
           <Link
             href="/posts"
             className="rounded-md border border-border px-4 py-3 text-sm font-medium hover:bg-hover"
           >
-            Posts (feed)
+            Browse posts
           </Link>
           <Link
             href="/search"
@@ -85,13 +85,13 @@ export default function Home() {
             href="/me"
             className="rounded-md border border-border px-4 py-3 text-sm font-medium hover:bg-hover"
           >
-            Account (auth)
+            Your account
           </Link>
         </nav>
       </section>
 
       <section className="rounded-lg border border-border bg-card p-4 shadow-[var(--shadow-1)]">
-        <h2 className="text-base font-medium">What you can track (v1)</h2>
+        <h2 className="text-base font-medium">What you can track</h2>
         <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
           <li>Strain name + brand/grower + type</li>
           <li>Rating (1–5)</li>
@@ -101,7 +101,7 @@ export default function Home() {
       </section>
 
       <footer className="text-xs text-muted-foreground">
-        No accounts yet. This is local/dev-friendly and evolves from here.
+        Start with a review, then build your profile and follow people with similar taste.
       </footer>
     </main>
   );
