@@ -20,7 +20,8 @@
     "e2e:test": "playwright test",
     "e2e:test:headed": "playwright test --headed",
     "e2e:install": "playwright install chromium",
-    "aws:bootstrap": "node scripts/aws-bootstrap.mjs"
+    "aws:bootstrap": "node scripts/aws-bootstrap.mjs",
+    "github:bootstrap": "node scripts/github-env-bootstrap.mjs"
   },
   "dependencies": {
     "@next-auth/prisma-adapter": "^1.0.7",
