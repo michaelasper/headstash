@@ -38,7 +38,7 @@ export default async function NewReviewPage() {
     <Container>
       <PageHeader
         title="New review"
-        subtitle="Capture the basics: strain, rating, date, notes."
+        subtitle="Capture what you tried, how it felt, and what to remember."
         right={
           <Link href="/reviews" className="text-sm text-neutral-600 hover:underline">
             Back

@@ -50,7 +50,7 @@ export default async function SearchPage({
     <Container>
       <PageHeader
         title="Search"
-        subtitle="Users and posts (v0)."
+        subtitle="Find people and posts across Headstash."
         right={
           <Link href="/" className="text-sm text-neutral-600 hover:underline">
             Home

@@ -68,7 +68,7 @@ export default async function NotificationsPage({
     <Container>
       <PageHeader
         title="Notifications"
-        subtitle={unread > 0 ? `${unread} unread` : "All caught up"}
+        subtitle={unread > 0 ? `${unread} unread notification${unread === 1 ? "" : "s"}` : "All caught up"}
         right={
           <Link href="/me" className="text-sm text-neutral-600 hover:underline">
             Back

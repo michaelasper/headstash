@@ -51,7 +51,7 @@ export default async function ProfilePage() {
     <Container>
       <PageHeader
         title="Profile"
-        subtitle="Edit your public-facing profile fields (MVP)."
+        subtitle="Update the details people see on your public profile."
         right={
           <Link href="/me" className="text-sm text-neutral-600 hover:underline">
             Back

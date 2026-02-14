@@ -20,7 +20,7 @@ export default function NewTagPage() {
     <Container>
       <PageHeader
         title="New tag"
-        subtitle="Add an effect or terpene for filtering."
+        subtitle="Add a new effect or terpene tag for review filters."
         right={
           <Link href="/tags" className="text-sm text-neutral-600 hover:underline">
             Back
