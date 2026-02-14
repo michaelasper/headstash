@@ -55,7 +55,7 @@ export default async function ReviewsPage({
       take: 200,
     }),
     prisma.review.findMany({
-      orderBy: [{ createdAt: "desc" }],
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
       take: 200,
       include: {
         strain: true,

@@ -39,13 +39,13 @@ export default async function PostsPage() {
     viewer
       ? prisma.review.findMany({
           where: { userId: viewer.id },
-          orderBy: [{ createdAt: "desc" }],
+          orderBy: [{ createdAt: "desc" }, { id: "desc" }],
           take: 50,
           include: { strain: true },
         })
       : Promise.resolve([]),
     prisma.post.findMany({
-      orderBy: [{ createdAt: "desc" }],
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
       take: 100,
     include: {
       author: {

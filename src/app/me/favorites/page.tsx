@@ -47,7 +47,7 @@ export default async function FavoritesPage() {
 
   const favorites = await prisma.favorite.findMany({
     where: { userId: user.id },
-    orderBy: [{ createdAt: "desc" }],
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     take: 100,
     include: {
       post: {
