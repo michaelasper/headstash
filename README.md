@@ -148,24 +148,30 @@ npx prisma studio
 
 ## Environment
 
-Expected env vars (see `.env.example`):
+Runtime env is validated at startup. Invalid/incomplete configuration fails fast with a clear error.
 
-- `DATABASE_URL` (SQLite connection string)
-- `AUTH_SECRET` (required in prod; dev default exists)
-- `AUTH_URL` (recommended; base URL for callbacks)
+Required in **all** environments:
 
-OAuth (optional)
+- `DATABASE_URL`
 
-- `GITHUB_CLIENT_ID`
-- `GITHUB_CLIENT_SECRET`
+Required in **production**:
 
-Email magic link (optional SMTP; dev fallback logs magic link to console):
+- `AUTH_SECRET` (or `NEXTAUTH_SECRET`)
+- `AUTH_URL` (or `NEXTAUTH_URL`)
 
-- `EMAIL_SERVER_HOST`
-- `EMAIL_SERVER_PORT`
-- `EMAIL_SERVER_USER`
-- `EMAIL_SERVER_PASSWORD`
-- `EMAIL_FROM`
+Development/test defaults:
+
+- `AUTH_SECRET` / `NEXTAUTH_SECRET` default to a local dev secret if omitted
+- `AUTH_URL` / `NEXTAUTH_URL` default to `http://localhost:3000` if omitted
+
+Optional integrations:
+
+- GitHub OAuth: `GITHUB_CLIENT_ID` + `GITHUB_CLIENT_SECRET` (must be set together)
+- SMTP magic links: `EMAIL_SERVER_HOST`, `EMAIL_SERVER_PORT`, `EMAIL_SERVER_USER`, `EMAIL_SERVER_PASSWORD`, `EMAIL_FROM` (all-or-none)
+- Local parity mode: `AUTH_LOCAL_MODE=full|credentials-only`
+- Prisma slow query logging threshold: `PRISMA_SLOW_QUERY_THRESHOLD_MS` (default `100`)
+
+See `.env.example` for complete values and comments.
 
 ## Validation / constraints
 
