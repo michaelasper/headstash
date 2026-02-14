@@ -1,5 +1,59 @@
 import Link from "next/link";
 
+export function AppShell({
+  children,
+  title,
+  subtitle,
+  nav,
+}: {
+  children: React.ReactNode;
+  title: string;
+  subtitle?: string;
+  nav?: React.ReactNode;
+}) {
+  return (
+    <div className="min-h-dvh bg-background">
+      <header className="border-b border-border/70 bg-card/60 backdrop-blur">
+        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-end justify-between gap-4 px-4 py-4">
+          <div className="flex min-w-0 flex-col gap-1">
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+              Headstash
+            </p>
+            <h1 className="text-xl font-semibold tracking-tight md:text-2xl">{title}</h1>
+            {subtitle ? <p className="text-sm text-muted-foreground">{subtitle}</p> : null}
+          </div>
+          {nav ? <nav aria-label="Primary" className="flex flex-wrap gap-2">{nav}</nav> : null}
+        </div>
+      </header>
+
+      <main id="main-content" className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6">
+        {children}
+      </main>
+
+      <footer className="border-t border-border/70 py-4 text-center text-xs text-muted-foreground">
+        Built for quick notes, honest takes, and social discovery.
+      </footer>
+    </div>
+  );
+}
+
+export function AppShellNavLink({
+  href,
+  children,
+}: {
+  href: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      className="rounded-md border border-border bg-card px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground transition hover:bg-hover hover:text-foreground"
+    >
+      {children}
+    </Link>
+  );
+}
+
 export function Container({
   children,
   id = "main-content",
