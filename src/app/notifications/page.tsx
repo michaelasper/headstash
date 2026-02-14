@@ -55,7 +55,7 @@ export default async function NotificationsPage({
 
   const notifications = await prisma.notification.findMany({
     where: { userId: user.id },
-    orderBy: [{ createdAt: "desc" }],
+    orderBy: [{ readAt: "asc" }, { createdAt: "desc" }],
     take: 50,
     include: {
       actorUser: { select: { handle: true, displayName: true, email: true } },
