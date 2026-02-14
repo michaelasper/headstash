@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { Card, Container, PageHeader, buttonClassName } from "@/app/_components/ui";
 import CommentForm from "@/app/posts/[id]/CommentForm";
 import { toggleFavoritePost } from "@/app/posts/favorites";
+import { SocialProfileInline } from "@/app/_components/socialProfileCard";
 
 function ReviewCard({
   review,
@@ -34,10 +35,7 @@ function ReviewCard({
         </div>
       ) : null}
       <div className="mt-2">
-        <Link
-          href={`/reviews/${review.id}/edit`}
-          className="text-xs font-medium text-neutral-900 underline"
-        >
+        <Link href={`/reviews/${review.id}/edit`} className="text-xs font-medium text-neutral-900 underline">
           View review
         </Link>
       </div>
@@ -50,14 +48,6 @@ export const dynamic = "force-dynamic";
 export const metadata = {
   title: "Post",
 };
-
-function displayName(u: {
-  displayName: string | null;
-  handle: string | null;
-  email: string | null;
-}) {
-  return u.displayName ?? u.handle ?? u.email ?? "Anonymous";
-}
 
 export default async function PostDetailPage({
   params,
@@ -110,71 +100,44 @@ export default async function PostDetailPage({
       />
 
       <Card>
-        <div className="flex items-start gap-3">
-          <div className="h-10 w-10 overflow-hidden rounded-full border border-neutral-200 bg-neutral-100">
-            {post.author.avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={post.author.avatarUrl}
-                alt=""
-                className="h-full w-full object-cover"
-              />
-            ) : null}
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="flex items-baseline justify-between gap-3">
-              <div className="truncate text-sm font-medium">
-                {post.author.handle ? (
-                  <Link
-                    href={`/u/${post.author.handle.replace(/^@/, "")}`}
-                    className="hover:underline"
-                  >
-                    {displayName(post.author)}
-                  </Link>
-                ) : (
-                  displayName(post.author)
-                )}
-              </div>
-              <div className="shrink-0 text-xs text-neutral-500">
-                {post.createdAt.toLocaleString()}
-              </div>
-            </div>
+        <div className="flex flex-col gap-2">
+          <SocialProfileInline
+            author={post.author}
+            timestamp={post.createdAt.toLocaleString()}
+            meta={
+              <span className="rounded-full border border-border px-2 py-0.5 text-[10px] uppercase tracking-wide">
+                member
+              </span>
+            }
+          />
 
-            <p className="mt-2 whitespace-pre-wrap text-sm text-neutral-800">
-              {post.body}
-            </p>
+          <p className="pl-[52px] whitespace-pre-wrap text-sm text-neutral-800">{post.body}</p>
 
-            {post.review ? <ReviewCard review={post.review} /> : null}
+          {post.review ? <ReviewCard review={post.review} /> : null}
 
-            <div className="mt-3 flex flex-wrap items-center gap-3">
-              {viewer ? (
-                <form action={toggleFavoritePost}>
-                  <input type="hidden" name="postId" value={post.id} />
-                  <button
-                    type="submit"
-                    className={buttonClassName(
-                      post.favorites && post.favorites.length > 0 ? "primary" : "default",
-                    )}
-                  >
-                    {post.favorites && post.favorites.length > 0
-                      ? "Favorited"
-                      : "Favorite"}
-                  </button>
-                </form>
-              ) : (
-                <Link
-                  href="/auth/signin"
-                  className="text-sm font-medium text-neutral-900 underline"
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            {viewer ? (
+              <form action={toggleFavoritePost}>
+                <input type="hidden" name="postId" value={post.id} />
+                <button
+                  type="submit"
+                  className={buttonClassName(
+                    post.favorites && post.favorites.length > 0 ? "primary" : "default",
+                  )}
                 >
-                  Sign in to favorite
-                </Link>
-              )}
+                  {post.favorites && post.favorites.length > 0 ? "Favorited" : "Favorite"}
+                </button>
+              </form>
+            ) : (
+              <Link href="/auth/signin" className="text-sm font-medium text-neutral-900 underline">
+                Sign in to favorite
+              </Link>
+            )}
 
-              <div className="text-xs text-neutral-500">
-                {post._count.reactions} like{post._count.reactions === 1 ? "" : "s"} · {" "}
-                {post._count.comments} comment{post._count.comments === 1 ? "" : "s"} · {" "}
-                {post._count.favorites} favorite{post._count.favorites === 1 ? "" : "s"}
-              </div>
+            <div className="text-xs text-neutral-500">
+              {post._count.reactions} like{post._count.reactions === 1 ? "" : "s"} · {" "}
+              {post._count.comments} comment{post._count.comments === 1 ? "" : "s"} · {" "}
+              {post._count.favorites} favorite{post._count.favorites === 1 ? "" : "s"}
             </div>
           </div>
         </div>
@@ -201,39 +164,13 @@ export default async function PostDetailPage({
           <ul className="mt-3 divide-y divide-neutral-200">
             {post.comments.map((c) => (
               <li key={c.id} className="py-3">
-                <div className="flex items-start gap-3">
-                  <div className="h-8 w-8 overflow-hidden rounded-full border border-neutral-200 bg-neutral-100">
-                    {c.author.avatarUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={c.author.avatarUrl}
-                        alt=""
-                        className="h-full w-full object-cover"
-                      />
-                    ) : null}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-baseline justify-between gap-3">
-                      <div className="truncate text-sm font-medium">
-                        {c.author.handle ? (
-                          <Link
-                            href={`/u/${c.author.handle.replace(/^@/, "")}`}
-                            className="hover:underline"
-                          >
-                            {displayName(c.author)}
-                          </Link>
-                        ) : (
-                          displayName(c.author)
-                        )}
-                      </div>
-                      <div className="shrink-0 text-xs text-neutral-500">
-                        {c.createdAt.toLocaleString()}
-                      </div>
-                    </div>
-                    <p className="mt-1 whitespace-pre-wrap text-sm text-neutral-800">
-                      {c.body}
-                    </p>
-                  </div>
+                <div className="flex flex-col gap-1.5">
+                  <SocialProfileInline
+                    author={c.author}
+                    timestamp={c.createdAt.toLocaleString()}
+                    size="sm"
+                  />
+                  <p className="pl-[44px] whitespace-pre-wrap text-sm text-neutral-800">{c.body}</p>
                 </div>
               </li>
             ))}
