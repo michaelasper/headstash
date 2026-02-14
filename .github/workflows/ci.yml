@@ -25,6 +25,14 @@ jobs:
       AUTH_URL: "http://localhost:3000"
       NEXTAUTH_SECRET: "ci-secret"
       NEXTAUTH_URL: "http://localhost:3000"
+      # Deploy secret metadata placeholders for fail-fast validation (names/shape only).
+      TF_STATE_BACKEND: "ci-placeholder"
+      CLOUD_PROJECT_ID_STAGING: "ci-staging"
+      CLOUD_PROJECT_ID_PROD: "ci-prod"
+      CI_DEPLOY_ROLE_ARN: "ci-role"
+      APP_DATABASE_URL: "ci-placeholder"
+      APP_AUTH_SECRET: "ci-placeholder"
+      APP_AUTH_URL: "http://localhost:3000"
 
     steps:
       - name: Checkout
@@ -38,6 +46,9 @@ jobs:
 
       - name: Install deps
         run: npm ci
+
+      - name: Validate deploy metadata env (fail-fast)
+        run: npm run secrets:validate:ci
 
       - name: Sanity (local parity)
         run: npm run sanity
