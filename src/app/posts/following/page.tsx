@@ -32,7 +32,7 @@ export default async function FollowingFeedPage() {
         <Card>
           <Link
             href="/auth/signin"
-            className="rounded-lg bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 focus-visible:ring-2 focus-visible:ring-neutral-200"
+            className="rounded-lg border border-border bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90"
           >
             Sign in
           </Link>
@@ -68,9 +68,9 @@ export default async function FollowingFeedPage() {
         title="Posts"
         subtitle="Posts from people you follow."
         right={
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <FeedTabs active="following" />
-            <Link href="/" className="text-sm text-neutral-600 hover:underline">
+            <Link href="/" className="text-sm text-muted-foreground hover:underline">
               Home
             </Link>
           </div>
@@ -79,22 +79,17 @@ export default async function FollowingFeedPage() {
 
       {followingIds.length === 0 ? (
         <Card>
-          <p className="text-sm text-neutral-600">
+          <p className="text-sm text-muted-foreground">
             You aren’t following anyone yet.
           </p>
-          <p className="mt-2 text-xs text-neutral-500">
+          <p className="mt-2 text-xs text-muted-foreground">
             Visit a public profile (/u/@handle) and tap Follow.
           </p>
         </Card>
       ) : null}
 
       {followingIds.length > 0 ? (
-        <Card>
-          {(() => {
-            // Inline IIFE so we can keep the page minimal.
-            // Fetch posts from followed users (cap 50).
-            return null;
-          })()}
+        <Card className="p-0">
           <FollowingPostsList followingIds={followingIds} viewerId={viewer.id} />
         </Card>
       ) : null}
@@ -125,22 +120,22 @@ async function FollowingPostsList({
 
   if (posts.length === 0) {
     return (
-      <div>
-        <p className="text-sm text-neutral-600">No posts from followed users yet.</p>
+      <div className="p-4">
+        <p className="text-sm text-muted-foreground">No posts from followed users yet.</p>
       </div>
     );
   }
 
   return (
-    <ul className="divide-y divide-neutral-200">
+    <ul className="divide-y divide-border">
       {posts.map((p) => {
         const liked = p.reactions.some((r) => r.userId === viewerId);
         const favorited = p.favorites.some((f) => f.userId === viewerId);
 
         return (
-          <li key={p.id} className="py-4">
+          <li key={p.id} className="px-4 py-3">
             <div className="flex items-start gap-3">
-              <div className="h-10 w-10 overflow-hidden rounded-full border border-neutral-200 bg-neutral-100">
+              <div className="h-10 w-10 overflow-hidden rounded-full border border-border bg-muted">
                 {p.author.avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={p.author.avatarUrl} alt="" className="h-full w-full object-cover" />
@@ -148,8 +143,8 @@ async function FollowingPostsList({
               </div>
 
               <div className="min-w-0 flex-1">
-                <div className="flex items-baseline justify-between gap-3">
-                  <div className="truncate text-sm font-medium">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="truncate text-sm font-medium leading-tight">
                     {p.author.handle ? (
                       <Link
                         href={`/u/${p.author.handle.replace(/^@/, "")}`}
@@ -161,26 +156,26 @@ async function FollowingPostsList({
                       displayName(p.author)
                     )}
                   </div>
-                  <div className="shrink-0 text-xs text-neutral-500">
+                  <div className="shrink-0 text-[11px] uppercase tracking-wide text-muted-foreground">
                     {p.createdAt.toLocaleString()}
                   </div>
                 </div>
 
-                <p className="mt-2 whitespace-pre-wrap text-sm text-neutral-800">{p.body}</p>
+                <p className="mt-1.5 whitespace-pre-wrap text-sm leading-relaxed text-foreground">{p.body}</p>
 
-                <div className="mt-3 flex flex-wrap items-center gap-3">
-                  <div className="text-xs text-neutral-500">
+                <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                  <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
                     {p._count.reactions} like{p._count.reactions === 1 ? "" : "s"} · {" "}
                     {p._count.favorites} favorite{p._count.favorites === 1 ? "" : "s"} · {" "}
                     {p._count.comments} comment{p._count.comments === 1 ? "" : "s"}
                   </div>
                   <Link
                     href={`/posts/${p.id}`}
-                    className="text-sm font-medium text-neutral-900 underline"
+                    className="text-sm font-medium text-foreground underline"
                   >
                     View
                   </Link>
-                  <span className="text-xs text-neutral-500">
+                  <span className="text-xs text-muted-foreground">
                     {liked ? "Liked" : ""}{favorited ? (liked ? " · Favorited" : "Favorited") : ""}
                   </span>
                 </div>
