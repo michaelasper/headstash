@@ -1,14 +1,13 @@
 import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import { PrismaClient } from "@prisma/client";
 
+import { env } from "@/lib/env";
+
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
 function makePrismaClient() {
-  const url = process.env.DATABASE_URL;
-  if (!url) throw new Error("DATABASE_URL is not set");
-
-  const adapter = new PrismaBetterSqlite3({ url });
-  const isDevelopment = process.env.NODE_ENV === "development";
+  const adapter = new PrismaBetterSqlite3({ url: env.DATABASE_URL });
+  const isDevelopment = env.NODE_ENV === "development";
 
   const prisma = new PrismaClient({
     adapter,
@@ -18,9 +17,7 @@ function makePrismaClient() {
   });
 
   if (isDevelopment) {
-    const slowQueryThresholdMs = Number(
-      process.env.PRISMA_SLOW_QUERY_THRESHOLD_MS ?? 100,
-    );
+    const slowQueryThresholdMs = env.PRISMA_SLOW_QUERY_THRESHOLD_MS;
 
     prisma.$on("query", (event) => {
       if (event.duration < slowQueryThresholdMs) return;
@@ -39,4 +36,4 @@ function makePrismaClient() {
 
 export const prisma = globalForPrisma.prisma ?? makePrismaClient();
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+if (env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;

@@ -10,15 +10,19 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/auth/rateLimit";
+import {
+  authLocalMode,
+  env,
+  isCredentialsOnlyMode,
+  isGithubConfigured,
+  isSmtpConfigured,
+  resolvedAuthSecret,
+} from "@/lib/env";
 
-const hasSmtp = !!process.env.EMAIL_SERVER_HOST;
-const authLocalMode = process.env.AUTH_LOCAL_MODE ?? "full";
-const localCredentialsOnly = authLocalMode === "credentials-only";
+const hasSmtp = isSmtpConfigured;
+const localCredentialsOnly = isCredentialsOnlyMode;
 
-const githubEnabled =
-  !localCredentialsOnly &&
-  !!process.env.GITHUB_CLIENT_ID &&
-  !!process.env.GITHUB_CLIENT_SECRET;
+const githubEnabled = !localCredentialsOnly && isGithubConfigured;
 
 const emailMagicEnabled = !localCredentialsOnly;
 
@@ -36,8 +40,8 @@ export const authOptions: NextAuthOptions = {
     ...(githubEnabled
       ? [
           GitHubProvider({
-            clientId: process.env.GITHUB_CLIENT_ID!,
-            clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+            clientId: env.GITHUB_CLIENT_ID!,
+            clientSecret: env.GITHUB_CLIENT_SECRET!,
           }),
         ]
       : []),
@@ -84,15 +88,15 @@ export const authOptions: NextAuthOptions = {
             // but override sendVerificationRequest to log the magic link (DEV ONLY).
             server: hasSmtp
               ? {
-                  host: process.env.EMAIL_SERVER_HOST,
-                  port: Number(process.env.EMAIL_SERVER_PORT ?? "587"),
+                  host: env.EMAIL_SERVER_HOST,
+                  port: env.EMAIL_SERVER_PORT ?? 587,
                   auth: {
-                    user: process.env.EMAIL_SERVER_USER,
-                    pass: process.env.EMAIL_SERVER_PASSWORD,
+                    user: env.EMAIL_SERVER_USER,
+                    pass: env.EMAIL_SERVER_PASSWORD,
                   },
                 }
               : { host: "localhost", port: 587 },
-            from: process.env.EMAIL_FROM ?? "Headstash <no-reply@localhost>",
+            from: env.EMAIL_FROM ?? "Headstash <no-reply@localhost>",
             async sendVerificationRequest({ identifier, url }) {
               if (hasSmtp) {
                 // Let the default implementation send via nodemailer.
@@ -120,8 +124,5 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
-  secret:
-    process.env.AUTH_SECRET ??
-    process.env.NEXTAUTH_SECRET ??
-    "dev-secret-not-for-production",
+  secret: resolvedAuthSecret,
 };
