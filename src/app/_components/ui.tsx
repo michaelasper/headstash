@@ -23,7 +23,9 @@ export function PageHeader({
         <h1 className="text-2xl font-semibold leading-[var(--lh-heading)] tracking-tight">
           {title}
         </h1>
-        {subtitle ? <p className="text-sm text-neutral-600">{subtitle}</p> : null}
+        {subtitle ? (
+          <p className="text-sm text-muted-foreground">{subtitle}</p>
+        ) : null}
       </div>
       {right}
     </header>
@@ -74,7 +76,7 @@ export function Field({
     <label className="flex flex-col gap-1 text-sm">
       <span className="font-medium">{label}</span>
       {children}
-      {hint ? <span className="text-xs text-neutral-500">{hint}</span> : null}
+      {hint ? <span className="text-xs text-muted-foreground">{hint}</span> : null}
     </label>
   );
 }
