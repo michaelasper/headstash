@@ -1,18 +1,21 @@
 import Link from "next/link";
 
+import { AppShell, AppShellNavLink } from "@/app/_components/ui";
+
 export default function Home() {
   return (
-    <main
-      id="main-content"
-      className="mx-auto flex min-h-dvh max-w-xl flex-col gap-6 px-4 py-8"
+    <AppShell
+      title="Headstash"
+      subtitle="Track strains, share takes, and find trusted cannabis reviews."
+      nav={
+        <>
+          <AppShellNavLink href="/posts">Posts</AppShellNavLink>
+          <AppShellNavLink href="/reviews">Reviews</AppShellNavLink>
+          <AppShellNavLink href="/search">Search</AppShellNavLink>
+          <AppShellNavLink href="/me">Profile</AppShellNavLink>
+        </>
+      }
     >
-      <header className="flex flex-col gap-2">
-        <h1 className="text-h1">Headstash</h1>
-        <p className="text-sm text-muted-foreground">
-          Track strains, share takes, and find trusted cannabis reviews.
-        </p>
-      </header>
-
       <section className="rounded-lg border border-border bg-card p-4 shadow-[var(--shadow-1)]">
         <h2 className="text-base font-medium">Find reviews</h2>
         <form
@@ -44,7 +47,7 @@ export default function Home() {
 
       <section className="rounded-lg border border-border bg-card p-4 shadow-[var(--shadow-1)]">
         <h2 className="text-base font-medium">Quick actions</h2>
-        <nav className="mt-3 grid grid-cols-1 gap-3" aria-label="Quick actions">
+        <nav className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2" aria-label="Quick actions">
           <Link
             href="/reviews/new"
             className="rounded-md border border-border px-4 py-3 text-sm font-medium hover:bg-hover"
@@ -83,7 +86,7 @@ export default function Home() {
           </Link>
           <Link
             href="/me"
-            className="rounded-md border border-border px-4 py-3 text-sm font-medium hover:bg-hover"
+            className="rounded-md border border-border px-4 py-3 text-sm font-medium hover:bg-hover md:col-span-2"
           >
             Your account
           </Link>
@@ -99,10 +102,6 @@ export default function Home() {
           <li>Effect + terpene tags (for filtering)</li>
         </ul>
       </section>
-
-      <footer className="text-xs text-muted-foreground">
-        Start with a review, then build your profile and follow people with similar taste.
-      </footer>
-    </main>
+    </AppShell>
   );
 }

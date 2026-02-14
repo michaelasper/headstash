@@ -5,7 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { handleSlug } from "@/lib/handles";
-import { Card, Container, PageHeader } from "@/app/_components/ui";
+import { AppShell, AppShellNavLink, Card } from "@/app/_components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -18,8 +18,16 @@ export default async function MePage() {
 
   if (!session?.user?.email) {
     return (
-      <Container>
-        <PageHeader title="Account" subtitle="You’re currently signed out." />
+      <AppShell
+        title="Account"
+        subtitle="You’re currently signed out."
+        nav={
+          <>
+            <AppShellNavLink href="/">Home</AppShellNavLink>
+            <AppShellNavLink href="/auth/signin">Sign in</AppShellNavLink>
+          </>
+        }
+      >
         <Card>
           <Link
             href="/auth/signin"
@@ -28,7 +36,7 @@ export default async function MePage() {
             Sign in
           </Link>
         </Card>
-      </Container>
+      </AppShell>
     );
   }
 
@@ -48,8 +56,16 @@ export default async function MePage() {
   // Avoid redirect loops by not applying this guard to /onboarding.
   if (!user?.handle) {
     return (
-      <Container>
-        <PageHeader title="Welcome" subtitle="Let’s set up your profile." />
+      <AppShell
+        title="Welcome"
+        subtitle="Let’s set up your profile."
+        nav={
+          <>
+            <AppShellNavLink href="/">Home</AppShellNavLink>
+            <AppShellNavLink href="/onboarding">Onboarding</AppShellNavLink>
+          </>
+        }
+      >
         <Card>
           <Link
             href="/onboarding"
@@ -58,41 +74,25 @@ export default async function MePage() {
             Continue onboarding
           </Link>
         </Card>
-      </Container>
+      </AppShell>
     );
   }
 
   return (
-    <Container>
-      <PageHeader
-        title="Account"
-        subtitle={user.displayName ?? user.handle ?? "Session info"}
-        right={
-          <div className="flex gap-3 text-sm">
-            <Link href="/posts" className="text-neutral-600 hover:underline">
-              Posts
-            </Link>
-            <Link href="/me/favorites" className="text-neutral-600 hover:underline">
-              Favorites
-            </Link>
-            <Link
-              href="/notifications"
-              className="flex items-center gap-1 text-neutral-600 hover:underline"
-            >
-              <span>Notifications</span>
-              {unreadCount > 0 ? (
-                <span className="rounded-full bg-neutral-900 px-1.5 py-0.5 text-[10px] font-semibold leading-none text-white">
-                  {unreadCount}
-                </span>
-              ) : null}
-            </Link>
-            <Link href="/search" className="text-neutral-600 hover:underline">
-              Search
-            </Link>
-          </div>
-        }
-      />
-
+    <AppShell
+      title="Account"
+      subtitle={user.displayName ?? user.handle ?? "Session info"}
+      nav={
+        <>
+          <AppShellNavLink href="/posts">Posts</AppShellNavLink>
+          <AppShellNavLink href="/me/favorites">Favorites</AppShellNavLink>
+          <AppShellNavLink href="/notifications">
+            Notifications{unreadCount > 0 ? ` (${unreadCount})` : ""}
+          </AppShellNavLink>
+          <AppShellNavLink href="/search">Search</AppShellNavLink>
+        </>
+      }
+    >
       <Card>
         <div className="text-sm">
           <div>
@@ -122,6 +122,6 @@ export default async function MePage() {
           </Link>
         </div>
       </Card>
-    </Container>
+    </AppShell>
   );
 }

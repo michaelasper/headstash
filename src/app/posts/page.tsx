@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { Card, Container, PageHeader } from "@/app/_components/ui";
+import { AppShell, AppShellNavLink, Card } from "@/app/_components/ui";
 import PostComposer from "@/app/posts/postComposer";
 import FeedTabs from "@/app/posts/_components/FeedTabs";
 import { toggleLike } from "@/app/posts/reactions";
@@ -77,19 +77,21 @@ export default async function PostsPage() {
   ]);
 
   return (
-    <Container>
-      <PageHeader
-        title="Posts"
-        subtitle="See what people are sharing and add your own take."
-        right={
-          <div className="flex items-center gap-2">
-            <FeedTabs active="global" />
-            <Link href="/" className="text-sm text-muted-foreground hover:underline">
-              Home
-            </Link>
-          </div>
-        }
-      />
+    <AppShell
+      title="Posts"
+      subtitle="See what people are sharing and add your own take."
+      nav={
+        <>
+          <AppShellNavLink href="/">Home</AppShellNavLink>
+          <AppShellNavLink href="/posts/following">Following</AppShellNavLink>
+          <AppShellNavLink href="/reviews">Reviews</AppShellNavLink>
+          <AppShellNavLink href="/search">Search</AppShellNavLink>
+        </>
+      }
+    >
+      <div className="flex items-center justify-between gap-3">
+        <FeedTabs active="global" />
+      </div>
 
       <Card>
         {session?.user?.email ? (
@@ -259,6 +261,6 @@ export default async function PostsPage() {
           </ul>
         )}
       </Card>
-    </Container>
+    </AppShell>
   );
 }
