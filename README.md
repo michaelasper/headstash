@@ -66,6 +66,10 @@ No extra env vars required.
 - Passwords are hashed with bcrypt.
 - Rate limiting is in-memory (dev-only) and resets on server restart.
 
+### Local auth parity mode
+
+Set `AUTH_LOCAL_MODE="credentials-only"` in `.env` to run a local auth mode that mirrors production-style protected-route behavior with credentials sessions only (disables GitHub + magic link on sign-in UI).
+
 ### Profile MVP
 
 - Edit profile at `/profile` (requires sign-in)

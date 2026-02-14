@@ -11,7 +11,17 @@ function normalizeEmail(e: string) {
   return e.trim().toLowerCase();
 }
 
-export default function SignInForm() {
+interface SignInFormProps {
+  githubEnabled: boolean;
+  emailMagicEnabled: boolean;
+  hasSmtp: boolean;
+}
+
+export default function SignInForm({
+  githubEnabled,
+  emailMagicEnabled,
+  hasSmtp,
+}: SignInFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState<Mode>("login");
@@ -23,27 +33,28 @@ export default function SignInForm() {
   return (
     <Card>
       <div className="flex flex-col gap-5">
-        <div>
-          <button
-            type="button"
-            onClick={async () => {
-              setMessage(null);
-              await signIn("github", { callbackUrl: "/me" });
-            }}
-            className="w-full rounded-lg border border-neutral-200 bg-white px-4 py-2 text-sm font-medium hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-neutral-200"
-          >
-            Sign in with GitHub
-          </button>
-          <p className="mt-2 text-xs text-neutral-500">
-            If GitHub OAuth isn’t configured, this will error.
-          </p>
-        </div>
+        {githubEnabled ? (
+          <>
+            <div>
+              <button
+                type="button"
+                onClick={async () => {
+                  setMessage(null);
+                  await signIn("github", { callbackUrl: "/me" });
+                }}
+                className="w-full rounded-lg border border-neutral-200 bg-white px-4 py-2 text-sm font-medium hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-neutral-200"
+              >
+                Sign in with GitHub
+              </button>
+            </div>
 
-        <div className="flex items-center gap-3">
-          <div className="h-px flex-1 bg-neutral-200" />
-          <div className="text-xs text-neutral-500">or</div>
-          <div className="h-px flex-1 bg-neutral-200" />
-        </div>
+            <div className="flex items-center gap-3">
+              <div className="h-px flex-1 bg-neutral-200" />
+              <div className="text-xs text-neutral-500">or</div>
+              <div className="h-px flex-1 bg-neutral-200" />
+            </div>
+          </>
+        ) : null}
 
         <div>
           <div className="mb-2 flex gap-2 text-sm">
@@ -148,43 +159,49 @@ export default function SignInForm() {
           </form>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="h-px flex-1 bg-neutral-200" />
-          <div className="text-xs text-neutral-500">or</div>
-          <div className="h-px flex-1 bg-neutral-200" />
-        </div>
+        {emailMagicEnabled ? (
+          <>
+            <div className="flex items-center gap-3">
+              <div className="h-px flex-1 bg-neutral-200" />
+              <div className="text-xs text-neutral-500">or</div>
+              <div className="h-px flex-1 bg-neutral-200" />
+            </div>
 
-        <form
-          onSubmit={async (e) => {
-            e.preventDefault();
-            await signIn("email", { email: emailNormalized, callbackUrl: "/me" });
-          }}
-          className="flex flex-col gap-4"
-        >
-          <Field label="Email magic link">
-            <input
-              name="emailMagic"
-              type="email"
-              required
-              className={inputClassName}
-              placeholder="you@example.com"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </Field>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                await signIn("email", { email: emailNormalized, callbackUrl: "/me" });
+              }}
+              className="flex flex-col gap-4"
+            >
+              <Field label="Email magic link">
+                <input
+                  name="emailMagic"
+                  type="email"
+                  required
+                  className={inputClassName}
+                  placeholder="you@example.com"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </Field>
 
-          <button
-            type="submit"
-            className="rounded-lg border border-neutral-200 bg-white px-4 py-2 text-sm font-medium hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-neutral-200"
-          >
-            Send magic link
-          </button>
+              <button
+                type="submit"
+                className="rounded-lg border border-neutral-200 bg-white px-4 py-2 text-sm font-medium hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-neutral-200"
+              >
+                Send magic link
+              </button>
 
-          <p className="text-xs text-neutral-500">
-            DEV: if SMTP isn’t configured, the magic link is printed to the server console.
-          </p>
-        </form>
+              <p className="text-xs text-neutral-500">
+                {hasSmtp
+                  ? "Magic link will be delivered via configured SMTP provider."
+                  : "DEV: if SMTP isn’t configured, the magic link is printed to the server console."}
+              </p>
+            </form>
+          </>
+        ) : null}
       </div>
     </Card>
   );
