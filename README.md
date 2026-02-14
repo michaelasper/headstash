@@ -50,6 +50,41 @@ make db-seed
 make db-reset-seed
 ```
 
+<<<<<<< Updated upstream
+=======
+### Secret/bootstrap helper scripts
+
+Use these scripts to prepare deploy prerequisites without exposing values:
+
+```bash
+npm run secrets:bootstrap
+npm run secrets:bootstrap -- --provider=aws --aws-region=us-east-1 --aws-secret-prefix=/headstash
+npm run secrets:bootstrap -- --provider=aws --apply --aws-profile=<profile>
+npm run secrets:validate
+npm run secrets:validate:ci
+```
+
+- `secrets:bootstrap` prints required secret names and CI identity checklist.
+- AWS mode prints concrete `aws secretsmanager`/`aws iam` command templates for setup.
+- `--apply` (AWS only) creates placeholder secret entries for required names via AWS CLI.
+- `secrets:validate` checks required env-variable presence (metadata only).
+- `secrets:validate:ci` is strict mode for CI fail-fast validation.
+
+### Staging DNS + health readiness automation
+
+Use this script to verify rollback-drill readiness (DNS + TLS + health endpoint), with optional Route53 UPSERT support:
+
+```bash
+npm run staging:readiness -- --host=staging.headstash.app --health-path=/api/health
+npm run staging:readiness -- --json
+npm run staging:readiness -- --apply --aws-zone-id=<zone-id> --aws-target=<alb-or-dns-target> --aws-profile=<profile>
+```
+
+- `staging:readiness` checks DNS resolution, TLS certificate validity, and health endpoint status.
+- `--apply` performs Route53 UPSERT before validation (AWS CLI required).
+- Use `--json` for CI/log-friendly machine output.
+
+>>>>>>> Stashed changes
 ### Local observability toggles
 
 Use these optional env vars in `.env` for local diagnostics:
