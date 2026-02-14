@@ -39,14 +39,8 @@ jobs:
       - name: Install deps
         run: npm ci
 
-      - name: Prisma validate
-        run: npx prisma validate
-
-      - name: Prisma generate
-        run: npx prisma generate
-
-      - name: Lint
-        run: npm run lint
+      - name: Sanity (local parity)
+        run: npm run sanity
 
       - name: Build
         run: npm run build
