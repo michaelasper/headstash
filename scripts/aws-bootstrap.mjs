@@ -38,7 +38,7 @@ Idempotent AWS bootstrap scaffold for CI/CD foundations:
 - Terraform backend bucket (S3) + secure settings
 - Terraform lock table (DynamoDB)
 - GitHub OIDC provider
-- Staging/production deploy IAM role trust scaffolding
+- Staging/production deploy IAM roles + baseline inline policy scaffolding
 
 Options:
   --plan                           Plan mode (default)
@@ -61,6 +61,8 @@ Options:
 
   --staging-role-name=<name>       IAM role for staging deploys
   --production-role-name=<name>    IAM role for production deploys
+  --staging-policy-name=<name>     Inline policy name for staging role (default: HeadstashDeployBaseline)
+  --production-policy-name=<name>  Inline policy name for production role (default: HeadstashDeployBaseline)
 
 Examples:
   node scripts/aws-bootstrap.mjs --plan --json
@@ -92,6 +94,8 @@ const oidcThumbprint = getArgValue("--oidc-thumbprint", "6938fd4d98bab03faadb97b
 
 const stagingRoleName = getArgValue("--staging-role-name", "HeadstashDeployStaging");
 const productionRoleName = getArgValue("--production-role-name", "HeadstashDeployProduction");
+const stagingPolicyName = getArgValue("--staging-policy-name", "HeadstashDeployBaseline");
+const productionPolicyName = getArgValue("--production-policy-name", "HeadstashDeployBaseline");
 
 const outPath = getArgValue("--out", "artifacts/aws-bootstrap.json");
 
@@ -309,7 +313,81 @@ function buildTrustPolicy({ environment }) {
   };
 }
 
+function buildBaselineDeployPolicy() {
+  const bucketArn = `arn:aws:s3:::${stateBucket}`;
+  const objectArn = `${bucketArn}/*`;
+  const lockArn = accountId
+    ? `arn:aws:dynamodb:${region}:${accountId}:table/${lockTable}`
+    : `arn:aws:dynamodb:${region}:<account-id>:table/${lockTable}`;
+
+  return {
+    Version: "2012-10-17",
+    Statement: [
+      {
+        Sid: "StateBackendAccess",
+        Effect: "Allow",
+        Action: [
+          "s3:ListBucket",
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject",
+        ],
+        Resource: [bucketArn, objectArn],
+      },
+      {
+        Sid: "StateLockAccess",
+        Effect: "Allow",
+        Action: [
+          "dynamodb:GetItem",
+          "dynamodb:PutItem",
+          "dynamodb:DeleteItem",
+          "dynamodb:UpdateItem",
+          "dynamodb:DescribeTable",
+        ],
+        Resource: [lockArn],
+      },
+      {
+        Sid: "IdentityRead",
+        Effect: "Allow",
+        Action: ["sts:GetCallerIdentity"],
+        Resource: ["*"],
+      },
+    ],
+  };
+}
+
+function ensureRolePolicy(name, environment, policyName) {
+  const policyDoc = buildBaselineDeployPolicy();
+
+  if (mode === "apply") {
+    awsExec(
+      `iam put-role-policy --role-name ${shellQuote(name)} --policy-name ${shellQuote(policyName)} --policy-document ${shellQuote(JSON.stringify(policyDoc))}`,
+      { parseJson: false },
+    );
+    addStep(`iam-role-${environment}`, "put-inline-policy", "ok", `${name}:${policyName}`);
+
+    const listed = awsExec(`iam list-role-policies --role-name ${shellQuote(name)} --output json`, {
+      allowFailure: true,
+    });
+    const attached = Array.isArray(listed?.PolicyNames) && listed.PolicyNames.includes(policyName);
+    addStep(
+      `iam-role-${environment}`,
+      "verify-inline-policy",
+      attached ? "ok" : "failed",
+      `${name}:${policyName}`,
+    );
+
+    if (!attached) {
+      throw new Error(`Failed to verify inline policy '${policyName}' on role '${name}'`);
+    }
+  } else {
+    addStep(`iam-role-${environment}`, "put-inline-policy", "planned", `${name}:${policyName}`);
+    addStep(`iam-role-${environment}`, "verify-inline-policy", "planned", `${name}:${policyName}`);
+  }
+}
+
 function ensureRole(name, environment) {
+
   const get = awsExec(`iam get-role --role-name ${shellQuote(name)} --output json`, { allowFailure: true });
   const exists = !(get && get.__error);
   const trust = buildTrustPolicy({ environment });
@@ -333,9 +411,6 @@ function ensureRole(name, environment) {
     addStep(`iam-role-${environment}`, "update-trust", "planned", roleArn(name));
   }
 
-  warnings.push(
-    `Role ${name} currently includes trust policy scaffold only; attach least-privilege deploy permissions in follow-up step.`,
-  );
 }
 
 function renderResult() {
@@ -361,10 +436,12 @@ function renderResult() {
       staging: {
         name: stagingRoleName,
         arn: roleArn(stagingRoleName),
+        policyName: stagingPolicyName,
       },
       production: {
         name: productionRoleName,
         arn: roleArn(productionRoleName),
+        policyName: productionPolicyName,
       },
     },
     steps,
@@ -404,7 +481,9 @@ async function main() {
     ensureLockTable();
     ensureOidcProvider();
     ensureRole(stagingRoleName, "staging");
+    ensureRolePolicy(stagingRoleName, "staging", stagingPolicyName);
     ensureRole(productionRoleName, "production");
+    ensureRolePolicy(productionRoleName, "production", productionPolicyName);
 
     const payload = renderResult();
     const artifactPath = writeArtifact(payload);
