@@ -50,6 +50,9 @@ yarn-error.log*
 /prisma/dev.db-wal
 /prisma/dev.db-shm
 
+# generated bootstrap artifacts (local only)
+/artifacts/
+
 # general sqlite artifacts
 *.db
 *.db-journal
