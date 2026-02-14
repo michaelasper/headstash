@@ -80,7 +80,7 @@ export default async function PostsPage() {
     <Container>
       <PageHeader
         title="Posts"
-        subtitle="A simple feed (v0)."
+        subtitle="See what people are sharing and add your own take."
         right={
           <div className="flex items-center gap-3">
             <FeedTabs active="global" />
@@ -118,7 +118,7 @@ export default async function PostsPage() {
             <p className="text-sm text-neutral-600">No posts yet.</p>
             {session?.user?.email ? (
               <p className="text-xs text-neutral-500">
-                Write the first one above — short notes, strain takes, anything.
+                Be the first to share a note, strain take, or quick review.
               </p>
             ) : (
               <p className="text-xs text-neutral-500">
@@ -181,7 +181,7 @@ export default async function PostsPage() {
                           <div className="mt-1 text-xs text-neutral-600">
                             {p.review.consumedAt
                               ? p.review.consumedAt.toLocaleDateString()
-                              : "(no date)"}
+                              : "Date not added"}
                           </div>
                           {p.review.notes ? (
                             <div className="mt-2 line-clamp-3 whitespace-pre-wrap text-sm text-neutral-700">
