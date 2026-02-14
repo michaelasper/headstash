@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { AppShell, AppShellNavLink, Card } from "@/app/_components/ui";
+import { AppShell, AppShellNavLink, Card, buttonClassName } from "@/app/_components/ui";
 import PostComposer from "@/app/posts/postComposer";
 import FeedTabs from "@/app/posts/_components/FeedTabs";
 import { toggleLike } from "@/app/posts/reactions";
@@ -208,11 +208,7 @@ export default async function PostsPage() {
                               <input type="hidden" name="postId" value={p.id} />
                               <button
                                 type="submit"
-                                className={`rounded-lg border px-3 py-1 text-sm font-medium ${
-                                  liked
-                                    ? "border-foreground bg-foreground text-background"
-                                    : "border-border bg-card text-foreground hover:bg-hover"
-                                }`}
+                                className={buttonClassName(liked ? "primary" : "default")}
                               >
                                 {liked ? "Liked" : "Like"}
                               </button>
@@ -222,11 +218,7 @@ export default async function PostsPage() {
                               <input type="hidden" name="postId" value={p.id} />
                               <button
                                 type="submit"
-                                className={`rounded-lg border px-3 py-1 text-sm font-medium ${
-                                  favorited
-                                    ? "border-foreground bg-foreground text-background"
-                                    : "border-border bg-card text-foreground hover:bg-hover"
-                                }`}
+                                className={buttonClassName(favorited ? "primary" : "default")}
                               >
                                 {favorited ? "Favorited" : "Favorite"}
                               </button>
