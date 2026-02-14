@@ -50,6 +50,13 @@ make db-seed
 make db-reset-seed
 ```
 
+### Local observability toggles
+
+Use these optional env vars in `.env` for local diagnostics:
+- `PRISMA_SLOW_QUERY_THRESHOLD_MS` (default `100`)
+- `PRISMA_LOG_FORMAT` (`text` or `json`)
+- `PRISMA_LOG_INCLUDE_QUERY` (`1` to include SQL + params in logs)
+
 ### GitHub OAuth setup (optional)
 
 1) Create a GitHub OAuth App

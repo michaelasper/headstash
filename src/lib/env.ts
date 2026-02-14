@@ -28,6 +28,8 @@ const envSchema = z
       .int()
       .nonnegative()
       .default(100),
+    PRISMA_LOG_FORMAT: z.enum(["text", "json"]).default("text"),
+    PRISMA_LOG_INCLUDE_QUERY: z.coerce.boolean().default(false),
   })
   .superRefine((value, ctx) => {
     const authSecret = value.AUTH_SECRET ?? value.NEXTAUTH_SECRET;
