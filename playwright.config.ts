@@ -21,7 +21,7 @@ export default defineConfig({
     trace: "on-first-retry",
   },
   webServer: {
-    command: "npm run db:deploy && npm run db:seed && npm run dev",
+    command: "npm run db:generate && npm run db:deploy && npm run db:seed && npm run dev",
     env: e2eServerEnv,
     url: "http://127.0.0.1:3000",
     reuseExistingServer: false,
