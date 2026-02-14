@@ -35,7 +35,7 @@ export default function SignInForm() {
             Sign in with GitHub
           </button>
           <p className="mt-2 text-xs text-neutral-500">
-            If GitHub OAuth isn’t configured, this will error.
+            If GitHub sign-in is unavailable, use email sign-in below.
           </p>
         </div>
 
@@ -143,7 +143,7 @@ export default function SignInForm() {
             </button>
 
             <p className="text-xs text-neutral-500">
-              Note: rate limiting is in-memory (dev-only) and will reset on server restart.
+              We limit repeated attempts to help protect your account.
             </p>
           </form>
         </div>
@@ -182,7 +182,7 @@ export default function SignInForm() {
           </button>
 
           <p className="text-xs text-neutral-500">
-            DEV: if SMTP isn’t configured, the magic link is printed to the server console.
+            We’ll email you a secure sign-in link.
           </p>
         </form>
       </div>
