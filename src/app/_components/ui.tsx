@@ -1,8 +1,17 @@
 import Link from "next/link";
 
-export function Container({ children }: { children: React.ReactNode }) {
+export function Container({
+  children,
+  id = "main-content",
+}: {
+  children: React.ReactNode;
+  id?: string;
+}) {
   return (
-    <main className="mx-auto flex min-h-dvh max-w-[68ch] flex-col gap-5 px-4 py-6">
+    <main
+      id={id}
+      className="mx-auto flex min-h-dvh max-w-[68ch] flex-col gap-5 px-4 py-6"
+    >
       {children}
     </main>
   );

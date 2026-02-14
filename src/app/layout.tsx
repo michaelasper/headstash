@@ -39,6 +39,9 @@ export default function RootLayout({
       <body
         className={`${displayFont.variable} ${bodyFont.variable} ${uiFont.variable} antialiased`}
       >
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
         {children}
       </body>
     </html>
