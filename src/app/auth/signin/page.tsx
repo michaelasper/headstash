@@ -17,8 +17,8 @@ export default function SignInPage() {
         title="Sign in"
         subtitle={
           authRuntimeConfig.credentialsOnly
-            ? "Local auth mode: email+password only."
-            : "Magic link, GitHub OAuth, or email+password."
+            ? "Sign in with email + password."
+            : "Use GitHub, email + password, or a magic link."
         }
         right={
           <Link href="/" className="text-sm text-neutral-600 hover:underline">

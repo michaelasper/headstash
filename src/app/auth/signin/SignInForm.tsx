@@ -54,7 +54,11 @@ export default function SignInForm({
               <div className="h-px flex-1 bg-neutral-200" />
             </div>
           </>
-        ) : null}
+        ) : (
+          <p className="text-xs text-neutral-500">
+            GitHub sign-in is unavailable right now. Use email sign-in below.
+          </p>
+        )}
 
         <div>
           <div className="mb-2 flex gap-2 text-sm">
@@ -96,7 +100,6 @@ export default function SignInForm({
                     headers: { "content-type": "application/json" },
                     body: JSON.stringify({ email: emailNormalized, password }),
                   });
-                  // Do not reveal whether user existed.
                   if (!res.ok && res.status !== 200) {
                     setMessage("Could not create account. Please try again.");
                     return;
@@ -128,10 +131,7 @@ export default function SignInForm({
               />
             </Field>
 
-            <Field
-              label="Password"
-              hint={mode === "signup" ? "Min 8 characters" : undefined}
-            >
+            <Field label="Password" hint={mode === "signup" ? "Min 8 characters" : undefined}>
               <input
                 name="password"
                 type="password"
@@ -154,7 +154,7 @@ export default function SignInForm({
             </button>
 
             <p className="text-xs text-neutral-500">
-              Note: rate limiting is in-memory (dev-only) and will reset on server restart.
+              We limit repeated attempts to help protect your account.
             </p>
           </form>
         </div>
@@ -196,8 +196,8 @@ export default function SignInForm({
 
               <p className="text-xs text-neutral-500">
                 {hasSmtp
-                  ? "Magic link will be delivered via configured SMTP provider."
-                  : "DEV: if SMTP isn’t configured, the magic link is printed to the server console."}
+                  ? "We’ll email you a secure sign-in link."
+                  : "If email delivery is unavailable, your sign-in link appears in local server logs."}
               </p>
             </form>
           </>
