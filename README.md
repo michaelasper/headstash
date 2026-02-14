@@ -7,6 +7,7 @@ Mobile-friendly web app for logging cannabis strain reviews.
 ## UI foundations
 
 - See `docs/design.md` for semantic tokens + focus ring + typography/spacing guidance.
+- See `docs/prisma-migration-hardening.md` for migration safety and deploy rollback checklist.
 
 - Node.js 20+
 - npm
