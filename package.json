@@ -15,13 +15,7 @@
     "db:reset": "prisma migrate reset --force",
     "db:seed": "node prisma/seed.mjs",
     "db:reset-seed": "npm run db:reset && npm run db:seed",
-<<<<<<< Updated upstream
-=======
-    "secrets:bootstrap": "node scripts/secret-bootstrap.mjs",
-    "secrets:validate": "node scripts/secret-validate.mjs",
-    "secrets:validate:ci": "node scripts/secret-validate.mjs --ci",
     "staging:readiness": "node scripts/staging-readiness.mjs",
->>>>>>> Stashed changes
     "sanity": "npm run lint && npm run db:generate && npm run typecheck",
     "e2e:test": "playwright test",
     "e2e:test:headed": "playwright test --headed",
