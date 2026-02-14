@@ -7,6 +7,7 @@ import {
   Container,
   PageHeader,
   inputClassName,
+  buttonClassName,
 } from "@/app/_components/ui";
 
 export const dynamic = "force-dynamic";
@@ -162,10 +163,7 @@ export default async function ReviewsPage({
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <button
-              type="submit"
-              className="rounded-lg bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 focus-visible:ring-2 focus-visible:ring-neutral-200"
-            >
+            <button type="submit" className={buttonClassName("primary")}>
               Apply
             </button>
 
@@ -202,17 +200,11 @@ export default async function ReviewsPage({
                 : "No reviews yet."}
             </p>
             <div className="flex flex-wrap gap-3">
-              <Link
-                href="/reviews/new"
-                className="rounded-lg bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 focus-visible:ring-2 focus-visible:ring-neutral-200"
-              >
+              <Link href="/reviews/new" className={buttonClassName("primary")}>
                 Add a review
               </Link>
               {anyFilterActive ? (
-                <Link
-                  href="/reviews"
-                  className="rounded-lg border border-neutral-200 bg-white px-4 py-2 text-sm font-medium hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-neutral-200"
-                >
+                <Link href="/reviews" className={buttonClassName("default")}>
                   Clear filters
                 </Link>
               ) : null}

@@ -5,7 +5,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { Card, Container, PageHeader } from "@/app/_components/ui";
+import { Card, Container, PageHeader, buttonClassName } from "@/app/_components/ui";
 import CommentForm from "@/app/posts/[id]/CommentForm";
 import { toggleFavoritePost } from "@/app/posts/favorites";
 
@@ -152,11 +152,9 @@ export default async function PostDetailPage({
                   <input type="hidden" name="postId" value={post.id} />
                   <button
                     type="submit"
-                    className={`rounded-lg px-3 py-1.5 text-sm font-medium focus-visible:ring-2 focus-visible:ring-neutral-200 ${
-                      post.favorites && post.favorites.length > 0
-                        ? "bg-neutral-900 text-white"
-                        : "border border-neutral-200 bg-white hover:bg-neutral-50"
-                    }`}
+                    className={buttonClassName(
+                      post.favorites && post.favorites.length > 0 ? "primary" : "default",
+                    )}
                   >
                     {post.favorites && post.favorites.length > 0
                       ? "Favorited"
@@ -188,10 +186,7 @@ export default async function PostDetailPage({
         ) : (
           <div className="flex items-center justify-between gap-4">
             <p className="text-sm text-neutral-600">Sign in to comment.</p>
-            <Link
-              href="/auth/signin"
-              className="rounded-lg bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 focus-visible:ring-2 focus-visible:ring-neutral-200"
-            >
+            <Link href="/auth/signin" className={buttonClassName("primary")}>
               Sign in
             </Link>
           </div>

@@ -8,6 +8,7 @@ import {
   Field,
   PageHeader,
   inputClassName,
+  buttonClassName,
 } from "@/app/_components/ui";
 
 export const dynamic = "force-dynamic";
@@ -52,10 +53,7 @@ export default async function NewReviewPage() {
             <p className="text-sm text-neutral-600">
               You need at least one strain before creating a review.
             </p>
-            <Link
-              href="/strains/new"
-              className="rounded-lg bg-neutral-900 px-4 py-2 text-center text-sm font-medium text-white hover:bg-neutral-800"
-            >
+            <Link href="/strains/new" className={buttonClassName("primary")}>
               Create a strain
             </Link>
           </div>
@@ -129,10 +127,7 @@ export default async function NewReviewPage() {
               Need more tags? <Link href="/tags/new" className="underline">Add a tag</Link>
             </div>
 
-            <button
-              type="submit"
-              className="rounded-lg bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800"
-            >
+            <button type="submit" className={buttonClassName("primary")}>
               Save review
             </button>
           </form>

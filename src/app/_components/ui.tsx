@@ -95,18 +95,27 @@ export function PageHeader({
   );
 }
 
+type ButtonTone = "default" | "primary";
+
+export function buttonClassName(tone: ButtonTone = "default") {
+  if (tone === "primary") {
+    return "rounded-lg border border-border bg-foreground px-4 py-2 text-sm font-medium text-background transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border";
+  }
+
+  return "rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border";
+}
+
 export function ButtonLink({
   href,
   children,
+  tone = "default",
 }: {
   href: string;
   children: React.ReactNode;
+  tone?: ButtonTone;
 }) {
   return (
-    <Link
-      href={href}
-      className="rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium hover:bg-hover"
-    >
+    <Link href={href} className={buttonClassName(tone)}>
       {children}
     </Link>
   );

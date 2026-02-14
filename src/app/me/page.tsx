@@ -5,7 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { handleSlug } from "@/lib/handles";
-import { AppShell, AppShellNavLink, Card } from "@/app/_components/ui";
+import { AppShell, AppShellNavLink, ButtonLink, Card } from "@/app/_components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -29,12 +29,9 @@ export default async function MePage() {
         }
       >
         <Card>
-          <Link
-            href="/auth/signin"
-            className="rounded-lg bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 focus-visible:ring-2 focus-visible:ring-neutral-200"
-          >
+          <ButtonLink href="/auth/signin" tone="primary">
             Sign in
-          </Link>
+          </ButtonLink>
         </Card>
       </AppShell>
     );
@@ -67,12 +64,9 @@ export default async function MePage() {
         }
       >
         <Card>
-          <Link
-            href="/onboarding"
-            className="rounded-lg bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 focus-visible:ring-2 focus-visible:ring-neutral-200"
-          >
+          <ButtonLink href="/onboarding" tone="primary">
             Continue onboarding
-          </Link>
+          </ButtonLink>
         </Card>
       </AppShell>
     );
@@ -102,24 +96,14 @@ export default async function MePage() {
         </div>
 
         <div className="mt-4 flex flex-wrap gap-3">
-          <Link
-            href="/profile"
-            className="rounded-lg border border-neutral-200 bg-white px-4 py-2 text-sm font-medium hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-neutral-200"
-          >
-            Edit profile
-          </Link>
+          <ButtonLink href="/profile">Edit profile</ButtonLink>
           <Link
             href={`/u/${handleSlug(user.handle)}`}
             className="rounded-lg border border-neutral-200 bg-white px-4 py-2 text-sm font-medium hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-neutral-200"
           >
             View public profile
           </Link>
-          <Link
-            href="/api/auth/signout"
-            className="rounded-lg border border-neutral-200 bg-white px-4 py-2 text-sm font-medium hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-neutral-200"
-          >
-            Sign out
-          </Link>
+          <ButtonLink href="/api/auth/signout">Sign out</ButtonLink>
         </div>
       </Card>
     </AppShell>

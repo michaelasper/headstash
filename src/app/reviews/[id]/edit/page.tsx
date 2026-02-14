@@ -9,6 +9,7 @@ import {
   Field,
   PageHeader,
   inputClassName,
+  buttonClassName,
 } from "@/app/_components/ui";
 
 export const dynamic = "force-dynamic";
@@ -140,10 +141,7 @@ export default async function EditReviewPage({
             />
           </Field>
 
-          <button
-            type="submit"
-            className="rounded-lg bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 focus-visible:ring-2 focus-visible:ring-neutral-200"
-          >
+          <button type="submit" className={buttonClassName("primary")}>
             Save changes
           </button>
         </form>
