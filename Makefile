@@ -1,4 +1,4 @@
-.PHONY: help dev build start lint typecheck test sanity db-generate db-migrate db-deploy db-reset
+.PHONY: help dev build start lint typecheck test sanity db-generate db-migrate db-deploy db-reset db-seed db-reset-seed
 
 help:
 	@echo "Available targets:"
@@ -13,6 +13,8 @@ help:
 	@echo "  db-migrate  - Run prisma migrate dev"
 	@echo "  db-deploy   - Run prisma migrate deploy"
 	@echo "  db-reset    - Reset local database"
+	@echo "  db-seed     - Seed local database with deterministic demo data"
+	@echo "  db-reset-seed - Reset + reseed local database"
 
 dev:
 	npm run dev
@@ -46,3 +48,9 @@ db-deploy:
 
 db-reset:
 	npm run db:reset
+
+db-seed:
+	npm run db:seed
+
+db-reset-seed:
+	npm run db:reset-seed

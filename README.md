@@ -23,6 +23,9 @@ cp .env.example .env
 # create/apply local sqlite migration
 make db-migrate
 
+# seed deterministic local demo data
+make db-seed
+
 # run the dev server
 make dev
 ```
@@ -42,6 +45,8 @@ make db-generate
 make db-migrate
 make db-deploy
 make db-reset
+make db-seed
+make db-reset-seed
 ```
 
 ### GitHub OAuth setup (optional)
