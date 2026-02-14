@@ -64,7 +64,7 @@ export function Container({
   return (
     <main
       id={id}
-      className="mx-auto flex min-h-dvh max-w-[68ch] flex-col gap-5 px-4 py-6"
+      className="mx-auto flex min-h-dvh w-full max-w-[72ch] flex-col gap-6 px-4 py-8 md:py-10"
     >
       {children}
     </main>
@@ -83,7 +83,7 @@ export function PageHeader({
   return (
     <header className="flex items-start justify-between gap-4">
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold leading-[var(--lh-heading)] tracking-tight">
+        <h1 className="text-[length:var(--text-h2)] font-semibold leading-[var(--lh-heading)] tracking-tight md:text-[length:var(--text-h1)]">
           {title}
         </h1>
         {subtitle ? (
