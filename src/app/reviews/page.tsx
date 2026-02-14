@@ -99,7 +99,7 @@ export default async function ReviewsPage({
       <div className="sticky top-0 z-10 -mx-4 border-b border-neutral-200 bg-white/90 px-4 py-4 backdrop-blur">
         <PageHeader
           title="Reviews"
-          subtitle="Search and filter your recent entries."
+          subtitle="Search and filter your recent reviews."
           right={<ButtonLink href="/reviews/new">New</ButtonLink>}
         />
       </div>
@@ -187,7 +187,7 @@ export default async function ReviewsPage({
 
           {!anyFilterActive ? (
             <div className="text-xs text-neutral-500">
-              Tip: add a couple tags, then filter reviews by Effect/Terpene.
+              Tip: add a few tags, then filter reviews by effect or terpene.
             </div>
           ) : null}
         </form>

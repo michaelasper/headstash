@@ -69,7 +69,7 @@ export default async function FavoritesPage() {
     <Container>
       <PageHeader
         title="Favorites"
-        subtitle="Posts you’ve favorited."
+        subtitle="Posts you’ve saved to favorites."
         right={
           <Link href="/me" className="text-sm text-neutral-600 hover:underline">
             Back

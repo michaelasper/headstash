@@ -19,7 +19,7 @@ export default async function TagsPage() {
     <Container>
       <PageHeader
         title="Tags"
-        subtitle="Effects and terpenes used for filtering reviews."
+        subtitle="Create effect and terpene tags to organize your reviews."
         right={<ButtonLink href="/tags/new">New</ButtonLink>}
       />
 
