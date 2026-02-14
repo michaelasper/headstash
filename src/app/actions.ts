@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { prisma } from "@/lib/prisma";
+import { normalizeTagName } from "@/lib/handles";
 import { ReviewRating, StrainType, TagKind } from "@prisma/client";
 
 async function getOrCreateLocalUserId() {
@@ -33,7 +34,7 @@ const createStrainSchema = z.object({
 
 const createTagSchema = z.object({
   kind: z.nativeEnum(TagKind),
-  name: z.string().trim().min(1).max(60),
+  name: z.string().trim().min(1).max(60).transform((v) => normalizeTagName(v)),
 });
 
 export async function createTag(formData: FormData) {

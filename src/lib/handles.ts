@@ -27,3 +27,7 @@ export function normalizeHandle(raw: string) {
 export function handleSlug(handle: string) {
   return handle.replace(/^@/, "");
 }
+
+export function normalizeTagName(raw: string) {
+  return raw.trim().toLowerCase();
+}
