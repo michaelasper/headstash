@@ -21,10 +21,27 @@ npm ci
 cp .env.example .env
 
 # create/apply local sqlite migration
-npx prisma migrate dev
+make db-migrate
 
 # run the dev server
-npm run dev
+make dev
+```
+
+## Runtime commands
+
+Use these commands locally so dev/CI/prod workflows stay aligned:
+
+```bash
+make help
+make dev
+make lint
+make typecheck
+make build
+make sanity
+make db-generate
+make db-migrate
+make db-deploy
+make db-reset
 ```
 
 ### GitHub OAuth setup (optional)
@@ -109,10 +126,9 @@ Open http://localhost:3000
 ## Verify
 
 ```bash
-npx prisma validate
-npx prisma generate
-npm run lint
-npm run build
+make sanity
+# optionally, for full production-bundle verification when env is configured:
+make build
 ```
 
 ## Prisma Studio (optional)
