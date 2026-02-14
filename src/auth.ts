@@ -12,15 +12,32 @@ import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/auth/rateLimit";
 
 const hasSmtp = !!process.env.EMAIL_SERVER_HOST;
+const authLocalMode = process.env.AUTH_LOCAL_MODE ?? "full";
+const localCredentialsOnly = authLocalMode === "credentials-only";
+
+const githubEnabled =
+  !localCredentialsOnly &&
+  !!process.env.GITHUB_CLIENT_ID &&
+  !!process.env.GITHUB_CLIENT_SECRET;
+
+const emailMagicEnabled = !localCredentialsOnly;
+
+export const authRuntimeConfig = {
+  localMode: authLocalMode,
+  credentialsOnly: localCredentialsOnly,
+  githubEnabled,
+  emailMagicEnabled,
+  hasSmtp,
+};
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
-    ...(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET
+    ...(githubEnabled
       ? [
           GitHubProvider({
-            clientId: process.env.GITHUB_CLIENT_ID,
-            clientSecret: process.env.GITHUB_CLIENT_SECRET,
+            clientId: process.env.GITHUB_CLIENT_ID!,
+            clientSecret: process.env.GITHUB_CLIENT_SECRET!,
           }),
         ]
       : []),
@@ -60,30 +77,34 @@ export const authOptions: NextAuthOptions = {
         return { id: user.id, email: user.email };
       },
     }),
-    EmailProvider({
-      // If SMTP is configured, use it. Otherwise, we still register the provider,
-      // but override sendVerificationRequest to log the magic link (DEV ONLY).
-      server: hasSmtp
-        ? {
-            host: process.env.EMAIL_SERVER_HOST,
-            port: Number(process.env.EMAIL_SERVER_PORT ?? "587"),
-            auth: {
-              user: process.env.EMAIL_SERVER_USER,
-              pass: process.env.EMAIL_SERVER_PASSWORD,
+    ...(emailMagicEnabled
+      ? [
+          EmailProvider({
+            // If SMTP is configured, use it. Otherwise, we still register the provider,
+            // but override sendVerificationRequest to log the magic link (DEV ONLY).
+            server: hasSmtp
+              ? {
+                  host: process.env.EMAIL_SERVER_HOST,
+                  port: Number(process.env.EMAIL_SERVER_PORT ?? "587"),
+                  auth: {
+                    user: process.env.EMAIL_SERVER_USER,
+                    pass: process.env.EMAIL_SERVER_PASSWORD,
+                  },
+                }
+              : { host: "localhost", port: 587 },
+            from: process.env.EMAIL_FROM ?? "Headstash <no-reply@localhost>",
+            async sendVerificationRequest({ identifier, url }) {
+              if (hasSmtp) {
+                // Let the default implementation send via nodemailer.
+                // (EmailProvider uses the provided server/from settings.)
+                return;
+              }
+              // DEV ONLY: log the magic link to server console.
+              console.log("\n[DEV] Magic link for", identifier, "→", url, "\n");
             },
-          }
-        : { host: "localhost", port: 587 },
-      from: process.env.EMAIL_FROM ?? "Headstash <no-reply@localhost>",
-      async sendVerificationRequest({ identifier, url }) {
-        if (hasSmtp) {
-          // Let the default implementation send via nodemailer.
-          // (EmailProvider uses the provided server/from settings.)
-          return;
-        }
-        // DEV ONLY: log the magic link to server console.
-        console.log("\n[DEV] Magic link for", identifier, "→", url, "\n");
-      },
-    }),
+          }),
+        ]
+      : []),
   ],
   pages: {
     signIn: "/auth/signin",

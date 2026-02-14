@@ -19,7 +19,7 @@ export default async function MePage() {
   if (!session?.user?.email) {
     return (
       <Container>
-        <PageHeader title="Me" subtitle="You are not signed in." />
+        <PageHeader title="Account" subtitle="You’re currently signed out." />
         <Card>
           <Link
             href="/auth/signin"
@@ -65,7 +65,7 @@ export default async function MePage() {
   return (
     <Container>
       <PageHeader
-        title="Me"
+        title="Account"
         subtitle={user.displayName ?? user.handle ?? "Session info"}
         right={
           <div className="flex gap-3 text-sm">
