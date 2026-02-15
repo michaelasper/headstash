@@ -10,6 +10,7 @@ Mobile-friendly web app for logging cannabis strain reviews.
 - See `docs/prisma-migration-hardening.md` for migration safety and deploy rollback checklist.
 - See `docs/deployment-runbook.md` for deploy prerequisites, secret metadata requirements, and CI gate flow.
 - See `docs/e2e-playbook.md` for E2E architecture, local debugging commands, CI behavior, flaky-test triage, and ownership/update process.
+- See `docs/frontend-qa-visual-regression-checklist.md` for pre-merge UI regression checks across breakpoints, states, and interaction patterns.
 
 - Node.js 20+
 - npm
