@@ -1,6 +1,8 @@
 import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
-import { PrismaClient, ReviewRating, StrainType, TagKind } from "@prisma/client";
+import prismaPkg from "@prisma/client";
 import bcrypt from "bcryptjs";
+
+const { PrismaClient, ReviewRating, StrainType, TagKind } = prismaPkg;
 
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) {
