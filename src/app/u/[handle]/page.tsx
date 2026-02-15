@@ -30,7 +30,6 @@ export default async function PublicProfilePage({
     where: { handle: normalized },
     select: {
       id: true,
-      email: true,
       displayName: true,
       handle: true,
       bio: true,

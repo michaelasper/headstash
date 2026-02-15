@@ -41,7 +41,7 @@ export default async function SearchPage({
         take: 20,
         orderBy: [{ createdAt: "desc" }, { id: "desc" }],
         include: {
-          author: { select: { displayName: true, handle: true, avatarUrl: true, email: true } },
+          author: { select: { displayName: true, handle: true, avatarUrl: true } },
         },
       })
     : [];
@@ -134,7 +134,7 @@ export default async function SearchPage({
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-xs text-neutral-600">
-                        {p.author.handle ?? p.author.displayName ?? p.author.email ?? "Anonymous"}
+                        {p.author.handle ?? p.author.displayName ?? "Member"}
                       </div>
                       <div className="line-clamp-2 whitespace-pre-wrap text-sm text-neutral-800">
                         {p.body}
