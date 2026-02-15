@@ -25,7 +25,7 @@ function toInt(value, fallback) {
 }
 
 function shellQuote(value) {
-  return `'${String(value).replace(/'/g, `'"'"'`)}'`;
+  return `'${String(value).replace(/'/g, `"'"'`)}'`;
 }
 
 function printHelp() {
@@ -33,6 +33,7 @@ function printHelp() {
 
 Verifies staging readiness for rollback drills:
 - optional Route53 UPSERT for staging record (AWS)
+- optional Namecheap -> Route53 nameserver handoff guide
 - DNS resolution
 - TLS certificate validity
 - health endpoint response
@@ -45,16 +46,38 @@ Options:
 
 AWS Route53 automation (optional):
   --apply                         Apply Route53 UPSERT before validation
+  --apply-route53                 Alias for --apply
+
   --aws-zone-id=<zoneId>          Hosted Zone ID (required with --apply)
+  --route53-zone-id=<zoneId>      Alias for --aws-zone-id
+
   --aws-target=<target>           DNS target value (required with --apply)
+  --route53-record-value=<target> Alias for --aws-target
+
+  --aws-record-name=<name>        Record name to UPSERT (default: --host)
+  --route53-record-name=<name>    Alias for --aws-record-name
+
   --aws-record-type=CNAME|A       Record type for UPSERT (default: CNAME)
+  --route53-record-type=CNAME|A   Alias for --aws-record-type
+
   --aws-ttl=<seconds>             TTL for record (default: 60)
+  --route53-ttl=<seconds>         Alias for --aws-ttl
+
   --aws-profile=<profile>         Optional AWS CLI profile
+
+Namecheap handoff helper (optional):
+  --namecheap-guide               Include nameserver handoff instructions from Route53 zone
+  --namecheap-domain=<domain>     Domain in Namecheap (default: host apex)
 
 Examples:
   node scripts/staging-readiness.mjs
   node scripts/staging-readiness.mjs --host=staging.headstash.app --health-path=/api/health
-  node scripts/staging-readiness.mjs --apply --aws-zone-id=Z123 --aws-target=my-alb.us-east-1.elb.amazonaws.com --aws-profile=prod-admin`);
+
+  node scripts/staging-readiness.mjs --apply --aws-zone-id=Z123 --aws-target=my-alb.us-east-1.elb.amazonaws.com --aws-profile=prod-admin
+
+  node scripts/staging-readiness.mjs --apply-route53 --route53-zone-id=Z123 --route53-record-name=staging.headstash.app --route53-record-value=my-alb.us-east-1.elb.amazonaws.com
+
+  node scripts/staging-readiness.mjs --namecheap-guide --route53-zone-id=Z123 --namecheap-domain=headstash.app --json`);
 }
 
 if (hasArg("--help") || hasArg("-h")) {
@@ -67,21 +90,32 @@ const healthPath = getArgValue("--health-path", "/api/health");
 const timeoutMs = toInt(getArgValue("--timeout-ms", 12000), 12000);
 const outputJson = hasArg("--json");
 
-const shouldApply = hasArg("--apply");
-const awsZoneId = getArgValue("--aws-zone-id");
-const awsTarget = getArgValue("--aws-target");
-const awsRecordType = (getArgValue("--aws-record-type", "CNAME") || "CNAME").toUpperCase();
-const awsTtl = toInt(getArgValue("--aws-ttl", 60), 60);
+const shouldApply = hasArg("--apply") || hasArg("--apply-route53");
+const shouldPrintNamecheapGuide = hasArg("--namecheap-guide");
+
+const awsZoneId = getArgValue("--aws-zone-id", getArgValue("--route53-zone-id"));
+const awsTarget = getArgValue("--aws-target", getArgValue("--route53-record-value"));
+const route53RecordName = getArgValue("--aws-record-name", getArgValue("--route53-record-name", host));
+const awsRecordType = (
+  getArgValue("--aws-record-type", getArgValue("--route53-record-type", "CNAME")) || "CNAME"
+).toUpperCase();
+const awsTtl = toInt(getArgValue("--aws-ttl", getArgValue("--route53-ttl", 60)), 60);
 const awsProfile = getArgValue("--aws-profile", "");
+const namecheapDomain = getArgValue("--namecheap-domain", host.split(".").slice(-2).join("."));
 
 const allowedRecordTypes = new Set(["CNAME", "A"]);
 if (!allowedRecordTypes.has(awsRecordType)) {
-  console.error(`Unsupported --aws-record-type '${awsRecordType}'. Use CNAME or A.`);
+  console.error(`Unsupported record type '${awsRecordType}'. Use CNAME or A.`);
   process.exit(1);
 }
 
 if (shouldApply && (!awsZoneId || !awsTarget)) {
-  console.error("--apply requires both --aws-zone-id and --aws-target.");
+  console.error("--apply/--apply-route53 requires both --aws-zone-id/--route53-zone-id and --aws-target/--route53-record-value.");
+  process.exit(1);
+}
+
+if (shouldPrintNamecheapGuide && !awsZoneId) {
+  console.error("--namecheap-guide requires --aws-zone-id (or --route53-zone-id).\n");
   process.exit(1);
 }
 
@@ -92,11 +126,11 @@ function normalizeDnsName(name) {
 }
 
 function buildRoute53ChangeBatch() {
-  const name = normalizeDnsName(host);
+  const name = normalizeDnsName(route53RecordName);
   const target = awsRecordType === "CNAME" ? normalizeDnsName(awsTarget) : awsTarget;
 
   return {
-    Comment: `headstash staging readiness UPSERT for ${host}`,
+    Comment: `headstash staging readiness UPSERT for ${route53RecordName}`,
     Changes: [
       {
         Action: "UPSERT",
@@ -135,6 +169,50 @@ function applyRoute53Record() {
   return {
     command,
     output: parsed ?? output,
+  };
+}
+
+function getRoute53HostedZone() {
+  const profileArg = awsProfile ? `--profile ${awsProfile}` : "";
+  const command = ["aws", profileArg, "route53 get-hosted-zone", `--id ${shellQuote(awsZoneId)}`]
+    .filter(Boolean)
+    .join(" ");
+
+  const raw = execSync(command, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+  const parsed = JSON.parse(raw);
+
+  const nameServers = parsed?.DelegationSet?.NameServers ?? [];
+  const hostedZoneName = parsed?.HostedZone?.Name ?? null;
+
+  return {
+    command,
+    hostedZoneName,
+    nameServers,
+  };
+}
+
+function buildNamecheapGuide(hostedZone) {
+  const nameServers = (hostedZone?.nameServers ?? []).map((ns) => normalizeDnsName(ns));
+  const route53ZoneName = hostedZone?.hostedZoneName ? normalizeDnsName(hostedZone.hostedZoneName) : null;
+
+  return {
+    domain: namecheapDomain,
+    route53ZoneId: awsZoneId,
+    route53ZoneName,
+    stagingRecord: {
+      name: normalizeDnsName(route53RecordName),
+      type: awsRecordType,
+      target: awsRecordType === "CNAME" ? normalizeDnsName(awsTarget || "<staging-target>") : awsTarget || "<staging-target>",
+      ttl: awsTtl,
+    },
+    nameServers,
+    instructions: [
+      `In Namecheap: Domain List -> ${namecheapDomain} -> Manage -> Nameservers -> Custom DNS.`,
+      "Replace existing nameservers with the Route53 nameservers listed below and save.",
+      "Wait for Namecheap/registry propagation (typically minutes, sometimes up to 24h).",
+      `Then run this to upsert staging record in Route53: npm run -s staging:readiness -- --apply-route53 --route53-zone-id=${awsZoneId} --route53-record-name=${route53RecordName} --route53-record-value=<staging-target> --route53-record-type=${awsRecordType} --route53-ttl=${awsTtl}`,
+      `Finally verify readiness: npm run -s staging:readiness -- --host=${host} --health-path=${healthPath} --json`,
+    ],
   };
 }
 
@@ -208,12 +286,30 @@ async function main() {
   const result = {
     host,
     healthPath,
+    route53RecordName,
     appliedRoute53: null,
+    namecheapGuide: null,
     dns: null,
     tls: null,
     health: null,
     ok: false,
   };
+
+  if (shouldPrintNamecheapGuide) {
+    try {
+      const hostedZone = getRoute53HostedZone();
+      result.namecheapGuide = {
+        ok: true,
+        source: { command: hostedZone.command },
+        ...buildNamecheapGuide(hostedZone),
+      };
+    } catch (error) {
+      result.namecheapGuide = {
+        ok: false,
+        error: error.message,
+      };
+    }
+  }
 
   if (shouldApply) {
     try {
@@ -249,6 +345,22 @@ async function main() {
     console.log(JSON.stringify(result, null, 2));
   } else {
     console.log(`Staging readiness check for ${host}`);
+
+    if (result.namecheapGuide) {
+      console.log(`NAMECHEAP GUIDE: ${result.namecheapGuide.ok ? "READY" : "FAIL"}`);
+      if (!result.namecheapGuide.ok) {
+        console.log(`  ${result.namecheapGuide.error}`);
+      } else {
+        console.log(`  Domain: ${result.namecheapGuide.domain}`);
+        if (Array.isArray(result.namecheapGuide.nameServers) && result.namecheapGuide.nameServers.length) {
+          console.log("  Route53 nameservers:");
+          for (const ns of result.namecheapGuide.nameServers) {
+            console.log(`    - ${ns}`);
+          }
+        }
+      }
+    }
+
     console.log(`DNS:    ${result.dns?.ok ? "PASS" : "FAIL"}`);
     if (!result.dns?.ok) console.log(`  ${result.dns?.error || "No DNS records found"}`);
 

@@ -84,17 +84,25 @@ npm run github:bootstrap -- --apply --artifact artifacts/aws-bootstrap.json
 
 ### Staging DNS + health readiness automation
 
-Use this script to verify rollback-drill readiness (DNS + TLS + health endpoint), with optional Route53 UPSERT support:
+Use this script to verify rollback-drill readiness (DNS + TLS + health endpoint), with optional Route53 UPSERT support and Namecheap handoff guidance:
 
 ```bash
 npm run staging:readiness -- --host=staging.headstash.app --health-path=/api/health
 npm run staging:readiness -- --json
-npm run staging:readiness -- --apply --aws-zone-id=<zone-id> --aws-target=<alb-or-dns-target> --aws-profile=<profile>
+
+# Route53 apply aliases (both forms supported)
+npm run staging:readiness -- --apply --aws-zone-id=<zone-id> --aws-target=<alb-or-dns-target>
+npm run staging:readiness -- --apply-route53 --route53-zone-id=<zone-id> --route53-record-name=staging.headstash.app --route53-record-value=<alb-or-dns-target>
+
+# Namecheap -> Route53 nameserver handoff helper
+npm run staging:readiness -- --namecheap-guide --route53-zone-id=<zone-id> --namecheap-domain=headstash.app --json
 ```
 
 - `staging:readiness` checks DNS resolution, TLS certificate validity, and health endpoint status.
-- `--apply` performs Route53 UPSERT before validation (AWS CLI required).
+- `--apply` / `--apply-route53` performs Route53 UPSERT before validation (AWS CLI required).
+- `--namecheap-guide` fetches Route53 nameservers and prints the exact Namecheap handoff checklist.
 - Use `--json` for CI/log-friendly machine output.
+- Full operator steps: `docs/namecheap-to-route53-staging-runbook.md`.
 
 ### Local observability toggles
 
