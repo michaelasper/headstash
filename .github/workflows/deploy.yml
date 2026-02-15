@@ -1,0 +1,98 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      promote_to_production:
+        description: "Promote and apply production infrastructure"
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  preflight:
+    name: Preflight (build + tests)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: "file:./ci.db"
+      AUTH_SECRET: "ci-secret"
+      AUTH_URL: "http://localhost:3000"
+      NEXTAUTH_SECRET: "ci-secret"
+      NEXTAUTH_URL: "http://localhost:3000"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Sanity
+        run: npm run sanity
+
+      - name: Build
+        run: npm run build
+
+  staging_apply:
+    name: Terraform Apply (staging)
+    needs: preflight
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Terraform fmt check
+        run: terraform fmt -check -recursive infra/terraform
+
+      - name: Terraform init (staging)
+        run: terraform -chdir=infra/terraform/environments/staging init -backend=false
+
+      - name: Terraform validate (staging)
+        run: terraform -chdir=infra/terraform/environments/staging validate
+
+      - name: Terraform apply (staging)
+        run: terraform -chdir=infra/terraform/environments/staging apply -auto-approve -input=false
+
+  production_apply:
+    name: Terraform Apply (production, approval required)
+    needs: [preflight, staging_apply]
+    if: github.event_name == 'workflow_dispatch' && inputs.promote_to_production == true
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Terraform fmt check
+        run: terraform fmt -check -recursive infra/terraform
+
+      - name: Terraform init (prod)
+        run: terraform -chdir=infra/terraform/environments/prod init -backend=false
+
+      - name: Terraform validate (prod)
+        run: terraform -chdir=infra/terraform/environments/prod validate
+
+      - name: Terraform apply (prod)
+        run: terraform -chdir=infra/terraform/environments/prod apply -auto-approve -input=false
