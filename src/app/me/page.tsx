@@ -113,20 +113,25 @@ export default async function MePage() {
         </>
       }
     >
-      <Card className="border-neutral-800 bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-800 text-white">
-        <p className="text-xs uppercase tracking-[0.18em] text-neutral-300">Tonight’s pulse</p>
-        <h2 className="mt-2 text-2xl font-semibold tracking-tight">
+      <Card className="group relative overflow-hidden border-neutral-800 bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-800 text-white transition duration-300 hover:-translate-y-0.5 hover:shadow-2xl">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-20 -top-20 h-52 w-52 rounded-full bg-white/10 blur-3xl transition duration-500 group-hover:scale-110"
+        />
+
+        <p className="relative text-xs uppercase tracking-[0.18em] text-neutral-300">Tonight’s pulse</p>
+        <h2 className="relative mt-2 text-2xl font-semibold tracking-tight">
           {user.displayName ?? user.handle}, your social dashboard is live.
         </h2>
-        <p className="mt-2 max-w-2xl text-sm text-neutral-300">
+        <p className="relative mt-2 max-w-2xl text-sm text-neutral-300">
           Keep momentum with fresh posts, tighten your profile voice, and jump into high-signal conversations.
         </p>
 
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="relative mt-4 flex flex-wrap gap-2">
           <ButtonLink href="/posts">Open feed</ButtonLink>
           <Link
             href={`/u/${handleSlug(user.handle)}`}
-            className="rounded-lg border border-neutral-600 bg-neutral-900 px-4 py-2 text-sm font-medium text-neutral-100 hover:bg-neutral-800"
+            className="rounded-lg border border-neutral-600 bg-neutral-900 px-4 py-2 text-sm font-medium text-neutral-100 transition hover:-translate-y-0.5 hover:bg-neutral-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500"
           >
             View public profile
           </Link>
@@ -135,26 +140,29 @@ export default async function MePage() {
       </Card>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card>
+        <Card className="transition duration-200 hover:-translate-y-0.5 hover:shadow-md">
           <p className="text-xs uppercase tracking-wide text-neutral-500">Posts published</p>
           <p className="mt-1 text-2xl font-semibold">{postCount}</p>
           <p className="mt-1 text-xs text-neutral-500">Original updates shared to your network.</p>
         </Card>
 
-        <Card>
+        <Card className="transition duration-200 hover:-translate-y-0.5 hover:shadow-md">
           <p className="text-xs uppercase tracking-wide text-neutral-500">Reviews logged</p>
           <p className="mt-1 text-2xl font-semibold">{reviewCount}</p>
           <p className="mt-1 text-xs text-neutral-500">Structured strain notes with ratings and context.</p>
         </Card>
 
-        <Card>
-          <p className="text-xs uppercase tracking-wide text-neutral-500">Unread notifications</p>
+        <Card className="transition duration-200 hover:-translate-y-0.5 hover:shadow-md">
+          <p className="flex items-center gap-1 text-xs uppercase tracking-wide text-neutral-500">
+            Unread notifications
+            {unreadCount > 0 ? <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-amber-500" /> : null}
+          </p>
           <p className="mt-1 text-2xl font-semibold">{unreadCount}</p>
           <p className="mt-1 text-xs text-neutral-500">Replies, favorites, and follow activity waiting on you.</p>
         </Card>
       </div>
 
-      <Card>
+      <Card className="transition duration-300 hover:shadow-md">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h3 className="text-sm font-semibold">Recent activity</h3>
@@ -168,8 +176,11 @@ export default async function MePage() {
         ) : (
           <ul className="mt-4 space-y-3">
             {recentPosts.map((post) => (
-              <li key={post.id} className="rounded-lg border border-neutral-200 bg-white p-3">
-                <Link href={`/posts/${post.id}`} className="text-sm font-medium underline">
+              <li
+                key={post.id}
+                className="rounded-lg border border-neutral-200 bg-white p-3 transition duration-200 hover:-translate-y-0.5 hover:border-neutral-300 hover:shadow-sm"
+              >
+                <Link href={`/posts/${post.id}`} className="text-sm font-medium underline decoration-2 underline-offset-2">
                   {post.body.length > 100 ? `${post.body.slice(0, 100)}…` : post.body}
                 </Link>
                 <div className="mt-2 text-xs text-neutral-500">
