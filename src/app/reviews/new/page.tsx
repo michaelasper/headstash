@@ -1,5 +1,8 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
 
+import { authOptions } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { createReview } from "@/app/actions";
 import {
@@ -18,6 +21,22 @@ export const metadata = {
 };
 
 export default async function NewReviewPage() {
+  const session = await getServerSession(authOptions);
+  const sessionUser = session?.user as { id?: string; email?: string | null } | undefined;
+
+  const user = sessionUser?.id
+    ? await prisma.user.findUnique({ where: { id: sessionUser.id }, select: { id: true } })
+    : sessionUser?.email
+      ? await prisma.user.findUnique({
+          where: { email: sessionUser.email.toLowerCase() },
+          select: { id: true },
+        })
+      : null;
+
+  if (!user) {
+    redirect("/auth/signin");
+  }
+
   const [strains, effectTags, terpeneTags] = await Promise.all([
     prisma.strain.findMany({
       orderBy: [{ name: "asc" }],
@@ -135,7 +154,7 @@ export default async function NewReviewPage() {
       </Card>
 
       <p className="text-xs text-neutral-500">
-        Note: without auth yet, reviews are stored under a local dev user.
+        Reviews are saved to your signed-in account.
       </p>
     </Container>
   );

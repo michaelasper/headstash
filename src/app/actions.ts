@@ -2,22 +2,65 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
 import { z } from "zod";
 
+import { authOptions } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { normalizeTagName } from "@/lib/handles";
 import { ReviewRating, StrainType, TagKind } from "@prisma/client";
 
-async function getOrCreateLocalUserId() {
-  // No auth yet; use a stable local user so we can create reviews.
-  const email = "local@headstash";
-  const user = await prisma.user.upsert({
-    where: { email },
-    update: {},
-    create: { email, displayName: "Local" },
-    select: { id: true },
-  });
-  return user.id;
+type SessionIdentity = {
+  id: string;
+  email: string;
+};
+
+function getTaxonomyWriterAllowlist(): string[] {
+  return (process.env.HEADSTASH_TAXONOMY_WRITE_ALLOWLIST ?? "")
+    .split(",")
+    .map((value) => value.trim().toLowerCase())
+    .filter((value) => value.length > 0);
+}
+
+async function requireSessionIdentity(): Promise<SessionIdentity> {
+  const session = await getServerSession(authOptions);
+  const sessionUser = session?.user as { id?: string; email?: string | null } | undefined;
+
+  let user: { id: string; email: string | null } | null = null;
+
+  if (sessionUser?.id) {
+    user = await prisma.user.findUnique({
+      where: { id: sessionUser.id },
+      select: { id: true, email: true },
+    });
+  }
+
+  if (!user && sessionUser?.email) {
+    user = await prisma.user.findUnique({
+      where: { email: sessionUser.email.toLowerCase() },
+      select: { id: true, email: true },
+    });
+  }
+
+  if (!user?.email) {
+    throw new Error("Unauthorized");
+  }
+
+  return {
+    id: user.id,
+    email: user.email.toLowerCase(),
+  };
+}
+
+async function requireTaxonomyWriteAccess() {
+  const identity = await requireSessionIdentity();
+  const allowlist = getTaxonomyWriterAllowlist();
+
+  if (!allowlist.includes(identity.email)) {
+    throw new Error("Forbidden");
+  }
+
+  return identity;
 }
 
 const createStrainSchema = z.object({
@@ -38,6 +81,8 @@ const createTagSchema = z.object({
 });
 
 export async function createTag(formData: FormData) {
+  await requireTaxonomyWriteAccess();
+
   const parsed = createTagSchema.safeParse({
     kind: formData.get("kind"),
     name: formData.get("name"),
@@ -57,6 +102,8 @@ export async function createTag(formData: FormData) {
 }
 
 export async function createStrain(formData: FormData) {
+  await requireTaxonomyWriteAccess();
+
   const parsed = createStrainSchema.safeParse({
     name: formData.get("name"),
     brand: formData.get("brand"),
@@ -164,9 +211,7 @@ export async function updateReview(formData: FormData) {
 
   if (!parsed.success) throw new Error(parsed.error.message);
 
-  // Ownership placeholder: until auth exists, treat the local user as the only user.
-  // TODO(auth): replace with session user id and enforce strict ownership.
-  const userId = await getOrCreateLocalUserId();
+  const identity = await requireSessionIdentity();
 
   const existing = await prisma.review.findUnique({
     where: { id: parsed.data.reviewId },
@@ -174,7 +219,7 @@ export async function updateReview(formData: FormData) {
   });
 
   if (!existing) throw new Error("Review not found");
-  if (existing.userId !== userId) throw new Error("Not allowed");
+  if (existing.userId !== identity.id) throw new Error("Forbidden");
 
   await prisma.review.update({
     where: { id: parsed.data.reviewId },
@@ -254,11 +299,11 @@ export async function createReview(formData: FormData) {
     throw new Error(parsed.error.message);
   }
 
-  const userId = await getOrCreateLocalUserId();
+  const identity = await requireSessionIdentity();
 
   const review = await prisma.review.create({
     data: {
-      userId,
+      userId: identity.id,
       strainId: parsed.data.strainId,
       rating: parsed.data.rating,
       consumedAt: parsed.data.consumedAt,

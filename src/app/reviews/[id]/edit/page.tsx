@@ -1,6 +1,8 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
 
+import { authOptions } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { updateReview } from "@/app/actions";
 import {
@@ -32,6 +34,22 @@ export default async function EditReviewPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const session = await getServerSession(authOptions);
+  const sessionUser = session?.user as { id?: string; email?: string | null } | undefined;
+
+  const viewer = sessionUser?.id
+    ? await prisma.user.findUnique({ where: { id: sessionUser.id }, select: { id: true } })
+    : sessionUser?.email
+      ? await prisma.user.findUnique({
+          where: { email: sessionUser.email.toLowerCase() },
+          select: { id: true },
+        })
+      : null;
+
+  if (!viewer) {
+    redirect("/auth/signin");
+  }
+
   const { id } = await params;
 
   const review = await prisma.review.findUnique({
@@ -43,6 +61,9 @@ export default async function EditReviewPage({
   });
 
   if (!review) notFound();
+  if (review.userId !== viewer.id) {
+    redirect("/reviews");
+  }
 
   const [effectTags, terpeneTags] = await Promise.all([
     prisma.tag.findMany({
