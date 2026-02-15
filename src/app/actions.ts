@@ -24,16 +24,23 @@ function getTaxonomyWriterAllowlist(): string[] {
 
 async function requireSessionIdentity(): Promise<SessionIdentity> {
   const session = await getServerSession(authOptions);
-  const email = session?.user?.email?.toLowerCase();
+  const sessionUser = session?.user as { id?: string; email?: string | null } | undefined;
 
-  if (!email) {
-    throw new Error("Unauthorized");
+  let user: { id: string; email: string | null } | null = null;
+
+  if (sessionUser?.id) {
+    user = await prisma.user.findUnique({
+      where: { id: sessionUser.id },
+      select: { id: true, email: true },
+    });
   }
 
-  const user = await prisma.user.findUnique({
-    where: { email },
-    select: { id: true, email: true },
-  });
+  if (!user && sessionUser?.email) {
+    user = await prisma.user.findUnique({
+      where: { email: sessionUser.email.toLowerCase() },
+      select: { id: true, email: true },
+    });
+  }
 
   if (!user?.email) {
     throw new Error("Unauthorized");
