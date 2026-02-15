@@ -64,7 +64,10 @@ test("accepts valid avatar upload, re-encodes, and stores private-served path", 
     | { ok: true; avatarUrl: string }
     | { ok: false; error: string };
   expect(response.ok(), `status=${response.status()} payload=${JSON.stringify(payload)}`).toBeTruthy();
-  expect(payload.ok).toBeTruthy();
+  if (!payload.ok) {
+    throw new Error(`Expected success payload but received error: ${payload.error}`);
+  }
+
   expect(payload.avatarUrl).toMatch(/^\/api\/profile\/avatar\/seed_user_alice-[A-Za-z0-9-]+\.webp$/);
 
   const stored = await prisma.user.findUnique({
