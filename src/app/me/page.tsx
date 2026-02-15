@@ -72,9 +72,34 @@ export default async function MePage() {
     );
   }
 
+  const [postCount, reviewCount, recentPosts] = await Promise.all([
+    prisma.post.count({
+      where: { author: { email } },
+    }),
+    prisma.review.count({
+      where: { userId: user.id },
+    }),
+    prisma.post.findMany({
+      where: { author: { email } },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      take: 3,
+      select: {
+        id: true,
+        body: true,
+        createdAt: true,
+        _count: {
+          select: {
+            comments: true,
+            favorites: true,
+          },
+        },
+      },
+    }),
+  ]);
+
   return (
     <AppShell
-      title="Account"
+      title="Dashboard"
       subtitle={user.displayName ?? user.handle ?? "Session info"}
       nav={
         <>
@@ -84,27 +109,77 @@ export default async function MePage() {
             Notifications{unreadCount > 0 ? ` (${unreadCount})` : ""}
           </AppShellNavLink>
           <AppShellNavLink href="/search">Search</AppShellNavLink>
+          <AppShellNavLink href="/profile">Profile</AppShellNavLink>
         </>
       }
     >
-      <Card>
-        <div className="text-sm">
-          <div>
-            <span className="text-neutral-500">Email:</span>{" "}
-            <span className="font-medium">{session.user.email ?? "—"}</span>
-          </div>
-        </div>
+      <Card className="border-neutral-800 bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-800 text-white">
+        <p className="text-xs uppercase tracking-[0.18em] text-neutral-300">Tonight’s pulse</p>
+        <h2 className="mt-2 text-2xl font-semibold tracking-tight">
+          {user.displayName ?? user.handle}, your social dashboard is live.
+        </h2>
+        <p className="mt-2 max-w-2xl text-sm text-neutral-300">
+          Keep momentum with fresh posts, tighten your profile voice, and jump into high-signal conversations.
+        </p>
 
-        <div className="mt-4 flex flex-wrap gap-3">
-          <ButtonLink href="/profile">Edit profile</ButtonLink>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <ButtonLink href="/posts">Open feed</ButtonLink>
           <Link
             href={`/u/${handleSlug(user.handle)}`}
-            className="rounded-lg border border-neutral-200 bg-white px-4 py-2 text-sm font-medium hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-neutral-200"
+            className="rounded-lg border border-neutral-600 bg-neutral-900 px-4 py-2 text-sm font-medium text-neutral-100 hover:bg-neutral-800"
           >
             View public profile
           </Link>
+          <ButtonLink href="/profile">Edit profile</ButtonLink>
+        </div>
+      </Card>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <p className="text-xs uppercase tracking-wide text-neutral-500">Posts published</p>
+          <p className="mt-1 text-2xl font-semibold">{postCount}</p>
+          <p className="mt-1 text-xs text-neutral-500">Original updates shared to your network.</p>
+        </Card>
+
+        <Card>
+          <p className="text-xs uppercase tracking-wide text-neutral-500">Reviews logged</p>
+          <p className="mt-1 text-2xl font-semibold">{reviewCount}</p>
+          <p className="mt-1 text-xs text-neutral-500">Structured strain notes with ratings and context.</p>
+        </Card>
+
+        <Card>
+          <p className="text-xs uppercase tracking-wide text-neutral-500">Unread notifications</p>
+          <p className="mt-1 text-2xl font-semibold">{unreadCount}</p>
+          <p className="mt-1 text-xs text-neutral-500">Replies, favorites, and follow activity waiting on you.</p>
+        </Card>
+      </div>
+
+      <Card>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h3 className="text-sm font-semibold">Recent activity</h3>
+            <p className="text-xs text-neutral-500">Your latest posts and their conversation signals.</p>
+          </div>
           <ButtonLink href="/api/auth/signout">Sign out</ButtonLink>
         </div>
+
+        {recentPosts.length === 0 ? (
+          <p className="mt-4 text-sm text-neutral-600">No posts yet. Share a first update to start your story arc.</p>
+        ) : (
+          <ul className="mt-4 space-y-3">
+            {recentPosts.map((post) => (
+              <li key={post.id} className="rounded-lg border border-neutral-200 bg-white p-3">
+                <Link href={`/posts/${post.id}`} className="text-sm font-medium underline">
+                  {post.body.length > 100 ? `${post.body.slice(0, 100)}…` : post.body}
+                </Link>
+                <div className="mt-2 text-xs text-neutral-500">
+                  {post.createdAt.toLocaleString()} · {post._count.comments} comment{post._count.comments === 1 ? "" : "s"} · {" "}
+                  {post._count.favorites} favorite{post._count.favorites === 1 ? "" : "s"}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </Card>
     </AppShell>
   );
