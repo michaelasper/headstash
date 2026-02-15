@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { AppShell, AppShellNavLink, Card, buttonClassName } from "@/app/_components/ui";
+import { AppShell, AppShellNavLink, Card } from "@/app/_components/ui";
 import PostComposer from "@/app/posts/postComposer";
 import FeedTabs from "@/app/posts/_components/FeedTabs";
 import { toggleLike } from "@/app/posts/reactions";
@@ -277,15 +277,21 @@ export default async function PostsPage() {
                       </div>
                     ) : null}
 
-                    <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                    <div className="mt-2.5 flex flex-wrap items-center gap-2 rounded-xl border border-border bg-muted p-2">
                       {viewer ? (
                         <>
                           <form action={toggleLike}>
                             <input type="hidden" name="postId" value={p.id} />
                             <button
                               type="submit"
-                              className={buttonClassName(liked ? "primary" : "default")}
+                              aria-pressed={liked}
+                              className={`inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                                liked
+                                  ? "border-foreground bg-foreground text-background shadow-sm"
+                                  : "border-border bg-background text-muted-foreground hover:border-foreground hover:text-foreground"
+                              }`}
                             >
+                              <span aria-hidden="true">{liked ? "♥" : "♡"}</span>
                               {liked ? "Liked" : "Like"}
                             </button>
                           </form>
@@ -294,23 +300,35 @@ export default async function PostsPage() {
                             <input type="hidden" name="postId" value={p.id} />
                             <button
                               type="submit"
-                              className={buttonClassName(favorited ? "primary" : "default")}
+                              aria-pressed={favorited}
+                              className={`inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                                favorited
+                                  ? "border-foreground bg-foreground text-background shadow-sm"
+                                  : "border-border bg-background text-muted-foreground hover:border-foreground hover:text-foreground"
+                              }`}
                             >
+                              <span aria-hidden="true">{favorited ? "★" : "☆"}</span>
                               {favorited ? "Favorited" : "Favorite"}
                             </button>
                           </form>
                         </>
                       ) : (
-                        <Link href="/auth/signin" className="text-sm font-medium text-foreground underline">
+                        <Link
+                          href="/auth/signin"
+                          className="inline-flex items-center rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground hover:border-foreground hover:text-foreground"
+                        >
                           Sign in to react
                         </Link>
                       )}
 
-                      <Link href={`/posts/${p.id}`} className="text-sm font-medium text-foreground underline">
-                        View ({p._count.comments} comment{p._count.comments === 1 ? "" : "s"})
+                      <Link
+                        href={`/posts/${p.id}`}
+                        className="inline-flex items-center rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground hover:border-foreground hover:text-foreground"
+                      >
+                        💬 Comment ({p._count.comments})
                       </Link>
 
-                      <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                      <div className="ml-auto text-[11px] uppercase tracking-wide text-muted-foreground">
                         {p._count.reactions} like{p._count.reactions === 1 ? "" : "s"} · {" "}
                         {p._count.favorites} favorite{p._count.favorites === 1 ? "" : "s"}
                       </div>

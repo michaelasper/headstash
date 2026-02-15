@@ -115,26 +115,40 @@ export default async function PostDetailPage({
 
           {post.review ? <ReviewCard review={post.review} /> : null}
 
-          <div className="mt-3 flex flex-wrap items-center gap-3">
+          <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-neutral-200 bg-neutral-50 p-2">
             {viewer ? (
               <form action={toggleFavoritePost}>
                 <input type="hidden" name="postId" value={post.id} />
                 <button
                   type="submit"
-                  className={buttonClassName(
-                    post.favorites && post.favorites.length > 0 ? "primary" : "default",
-                  )}
+                  aria-pressed={Boolean(post.favorites && post.favorites.length > 0)}
+                  className={`inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                    post.favorites && post.favorites.length > 0
+                      ? "border-neutral-900 bg-neutral-900 text-white shadow-sm"
+                      : "border-neutral-300 bg-white text-neutral-600 hover:border-neutral-900 hover:text-neutral-900"
+                  }`}
                 >
+                  <span aria-hidden="true">{post.favorites && post.favorites.length > 0 ? "★" : "☆"}</span>
                   {post.favorites && post.favorites.length > 0 ? "Favorited" : "Favorite"}
                 </button>
               </form>
             ) : (
-              <Link href="/auth/signin" className="text-sm font-medium text-neutral-900 underline">
+              <Link
+                href="/auth/signin"
+                className="inline-flex items-center rounded-full border border-neutral-300 bg-white px-3 py-1.5 text-xs font-medium text-neutral-600 hover:border-neutral-900 hover:text-neutral-900"
+              >
                 Sign in to favorite
               </Link>
             )}
 
-            <div className="text-xs text-neutral-500">
+            <Link
+              href="#comments"
+              className="inline-flex items-center rounded-full border border-neutral-300 bg-white px-3 py-1.5 text-xs font-medium text-neutral-600 hover:border-neutral-900 hover:text-neutral-900"
+            >
+              💬 Jump to comments ({post._count.comments})
+            </Link>
+
+            <div className="ml-auto text-xs text-neutral-500">
               {post._count.reactions} like{post._count.reactions === 1 ? "" : "s"} · {" "}
               {post._count.comments} comment{post._count.comments === 1 ? "" : "s"} · {" "}
               {post._count.favorites} favorite{post._count.favorites === 1 ? "" : "s"}
@@ -157,7 +171,7 @@ export default async function PostDetailPage({
       </Card>
 
       <Card>
-        <h2 className="text-sm font-medium">Comments</h2>
+        <h2 id="comments" className="text-sm font-medium">Comments</h2>
         {post.comments.length === 0 ? (
           <p className="mt-2 text-sm text-neutral-600">No comments yet.</p>
         ) : (
