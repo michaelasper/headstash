@@ -286,10 +286,7 @@ function ensureOidcProvider() {
 
 function buildTrustPolicy({ environment }) {
   const oidcHost = oidcUrl;
-  const sub =
-    environment === "production"
-      ? `repo:${repo}:environment:production`
-      : `repo:${repo}:ref:refs/heads/main`;
+  const sub = `repo:${repo}:environment:${environment}`;
 
   return {
     Version: "2012-10-17",
