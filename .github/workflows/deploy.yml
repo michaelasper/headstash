@@ -2,7 +2,8 @@ name: Deploy
 
 on:
   push:
-    branches: [main]
+    tags:
+      - "*"
   workflow_dispatch:
     inputs:
       promote_to_production:
@@ -50,7 +51,7 @@ jobs:
   staging_apply:
     name: Terraform Apply (staging)
     needs: preflight
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     environment: staging
     steps:
