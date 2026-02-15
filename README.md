@@ -8,6 +8,8 @@ Mobile-friendly web app for logging cannabis strain reviews.
 
 - See `docs/design.md` for semantic tokens + focus ring + typography/spacing guidance.
 - See `docs/prisma-migration-hardening.md` for migration safety and deploy rollback checklist.
+- See `docs/deployment-runbook.md` for deploy prerequisites, secret metadata requirements, and CI gate flow.
+- See `docs/e2e-playbook.md` for E2E architecture, local debugging commands, CI behavior, flaky-test triage, and ownership/update process.
 
 - Node.js 20+
 - npm
@@ -50,8 +52,18 @@ make db-seed
 make db-reset-seed
 ```
 
-<<<<<<< Updated upstream
-=======
+### E2E quickstart
+
+```bash
+npm run e2e:install
+npm run e2e:test -- --list
+npm run e2e:test -- --grep "home page renders key navigation"
+npm run e2e:test -- --project=chromium e2e/tests/critical/critical-path.spec.ts
+npm run e2e:test:headed
+```
+
+For full triage/debug guidance, see `docs/e2e-playbook.md`.
+
 ### Secret/bootstrap helper scripts
 
 Use these scripts to prepare deploy prerequisites without exposing values:
@@ -84,7 +96,6 @@ npm run staging:readiness -- --apply --aws-zone-id=<zone-id> --aws-target=<alb-o
 - `--apply` performs Route53 UPSERT before validation (AWS CLI required).
 - Use `--json` for CI/log-friendly machine output.
 
->>>>>>> Stashed changes
 ### Local observability toggles
 
 Use these optional env vars in `.env` for local diagnostics:
