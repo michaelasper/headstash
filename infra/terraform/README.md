@@ -9,6 +9,7 @@ This directory provides an initial Terraform layout for environment-separated de
 - `modules/networking` - VPC/subnet inputs/outputs scaffold
 - `modules/app_runtime` - app runtime inputs/outputs scaffold
 - `modules/state_backend` - remote state backend strategy scaffold
+- `modules/staging_ingress` - staging ALB + Route53 alias resources
 
 ## Backend state strategy
 
