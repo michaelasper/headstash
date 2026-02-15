@@ -100,6 +100,19 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+model RateLimitBucket {
+  id             String   @id @default(cuid())
+  bucketKey      String
+  windowStartSec Int
+  count          Int      @default(0)
+  expiresAt      DateTime
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([bucketKey, windowStartSec])
+  @@index([expiresAt])
+}
+
 model Credential {
   id           String   @id @default(cuid())
   userId       String   @unique

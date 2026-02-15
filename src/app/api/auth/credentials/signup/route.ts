@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 
+import { Prisma } from "@prisma/client";
+
 import { prisma } from "@/lib/prisma";
-import { checkRateLimit } from "@/auth/rateLimit";
+import { checkRateLimit, resolveClientIp } from "@/auth/rateLimit";
 
 const signupSchema = z.object({
   email: z.string().trim().email().max(320),
@@ -23,7 +25,13 @@ export async function POST(req: Request) {
 
   const email = parsed.data.email.toLowerCase();
 
-  const rl = checkRateLimit(`signup:${email}`, { windowMs: 60_000, max: 5 });
+  const rl = await checkRateLimit({
+    scope: "signup",
+    identity: email,
+    ip: resolveClientIp(req),
+    windowMs: 60_000,
+    max: 5,
+  });
   if (!rl.ok) {
     return NextResponse.json(
       { ok: false, error: "Too many attempts. Try again later." },
@@ -39,16 +47,23 @@ export async function POST(req: Request) {
 
   const passwordHash = await bcrypt.hash(parsed.data.password, 10);
 
-  await prisma.user.create({
-    data: {
-      email,
-      credential: {
-        create: {
-          passwordHash,
+  try {
+    await prisma.user.create({
+      data: {
+        email,
+        credential: {
+          create: {
+            passwordHash,
+          },
         },
       },
-    },
-  });
+    });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return NextResponse.json({ ok: true });
+    }
+    throw error;
+  }
 
   return NextResponse.json({ ok: true });
 }

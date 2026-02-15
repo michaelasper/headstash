@@ -9,7 +9,7 @@ import { z } from "zod";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 
 import { prisma } from "@/lib/prisma";
-import { checkRateLimit } from "@/auth/rateLimit";
+import { checkRateLimit, resolveClientIp } from "@/auth/rateLimit";
 import {
   authLocalMode,
   env,
@@ -51,7 +51,7 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         const parsed = z
           .object({
             email: z.string().trim().email().max(320),
@@ -61,8 +61,13 @@ export const authOptions: NextAuthOptions = {
 
         if (!parsed.success) return null;
 
-        const key = `login:${parsed.data.email.toLowerCase()}`;
-        const rl = checkRateLimit(key, { windowMs: 60_000, max: 8 });
+        const rl = await checkRateLimit({
+          scope: "login",
+          identity: parsed.data.email,
+          ip: resolveClientIp(req),
+          windowMs: 60_000,
+          max: 8,
+        });
         if (!rl.ok) {
           // Don't leak account existence; just fail.
           return null;
