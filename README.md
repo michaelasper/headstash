@@ -64,23 +64,23 @@ npm run e2e:test:headed
 
 For full triage/debug guidance, see `docs/e2e-playbook.md`.
 
-### Secret/bootstrap helper scripts
+### Deploy bootstrap helper scripts
 
-Use these scripts to prepare deploy prerequisites without exposing values:
+Use these scripts to wire AWS + GitHub deployment prerequisites from machine-readable artifacts:
 
 ```bash
-npm run secrets:bootstrap
-npm run secrets:bootstrap -- --provider=aws --aws-region=us-east-1 --aws-secret-prefix=/headstash
-npm run secrets:bootstrap -- --provider=aws --apply --aws-profile=<profile>
-npm run secrets:validate
-npm run secrets:validate:ci
+# 1) Create/verify AWS backend + OIDC + deploy role metadata artifact
+npm run aws:bootstrap -- --plan --json
+npm run aws:bootstrap -- --apply --repo <owner/repo> --profile <aws-profile>
+
+# 2) Configure GitHub staging/production environments from aws artifact
+npm run github:bootstrap -- --plan --json
+npm run github:bootstrap -- --apply --artifact artifacts/aws-bootstrap.json
 ```
 
-- `secrets:bootstrap` prints required secret names and CI identity checklist.
-- AWS mode prints concrete `aws secretsmanager`/`aws iam` command templates for setup.
-- `--apply` (AWS only) creates placeholder secret entries for required names via AWS CLI.
-- `secrets:validate` checks required env-variable presence (metadata only).
-- `secrets:validate:ci` is strict mode for CI fail-fast validation.
+- `aws:bootstrap` writes `artifacts/aws-bootstrap.json` (backend + OIDC + role metadata contract).
+- `github:bootstrap` consumes that artifact, upserts GitHub environments, sets env vars/secrets, and writes a redacted verification artifact.
+- Both support `--plan` (default) and `--apply`; `--json` prints machine-readable output for CI logs.
 
 ### Staging DNS + health readiness automation
 
