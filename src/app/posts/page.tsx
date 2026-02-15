@@ -69,6 +69,56 @@ export default async function PostsPage() {
     }),
   ]);
 
+  const peopleToFollow = Array.from(
+    posts
+      .reduce((acc, post) => {
+        const authorEmail = post.author.email?.toLowerCase() ?? null;
+        if (!authorEmail || (viewerEmail && authorEmail === viewerEmail)) {
+          return acc;
+        }
+
+        const existing = acc.get(authorEmail);
+        if (existing) {
+          existing.postCount += 1;
+        } else {
+          acc.set(authorEmail, {
+            email: authorEmail,
+            displayName: post.author.displayName,
+            handle: post.author.handle,
+            postCount: 1,
+          });
+        }
+
+        return acc;
+      }, new Map<string, { email: string; displayName: string | null; handle: string | null; postCount: number }>())
+      .values(),
+  )
+    .sort((a, b) => b.postCount - a.postCount)
+    .slice(0, 4);
+
+  const trendingStrains = Array.from(
+    posts
+      .reduce((acc, post) => {
+        const strainName = post.review?.strain.name;
+        if (!strainName) return acc;
+        acc.set(strainName, (acc.get(strainName) ?? 0) + 1);
+        return acc;
+      }, new Map<string, number>())
+      .entries(),
+  )
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+
+  const activeDiscussions = [...posts]
+    .filter((post) => post._count.comments > 0)
+    .sort((a, b) => {
+      if (b._count.comments !== a._count.comments) {
+        return b._count.comments - a._count.comments;
+      }
+      return b.createdAt.getTime() - a.createdAt.getTime();
+    })
+    .slice(0, 3);
+
   return (
     <AppShell
       title="Posts"
@@ -105,6 +155,67 @@ export default async function PostsPage() {
             </Link>
           </div>
         )}
+      </Card>
+
+      <Card>
+        <h2 className="text-sm font-medium">Discover</h2>
+        <div className="mt-3 grid gap-4 md:grid-cols-3">
+          <section className="space-y-2">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">People to follow</h3>
+            {peopleToFollow.length === 0 ? (
+              <p className="text-sm text-muted-foreground">More member suggestions appear as activity grows.</p>
+            ) : (
+              <ul className="space-y-1.5">
+                {peopleToFollow.map((person) => (
+                  <li key={person.email} className="text-sm text-foreground">
+                    <span className="font-medium">{person.handle ? `@${person.handle}` : person.displayName ?? "Member"}</span>
+                    <span className="ml-2 text-xs text-muted-foreground">
+                      {person.postCount} recent post{person.postCount === 1 ? "" : "s"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section className="space-y-2">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Trending strains</h3>
+            {trendingStrains.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Trending strain data will appear after review-linked posts land.</p>
+            ) : (
+              <ul className="space-y-1.5">
+                {trendingStrains.map(([strainName, count]) => (
+                  <li key={strainName} className="text-sm text-foreground">
+                    <span className="font-medium">{strainName}</span>
+                    <span className="ml-2 text-xs text-muted-foreground">
+                      {count} mention{count === 1 ? "" : "s"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section className="space-y-2">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Active discussions</h3>
+            {activeDiscussions.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No active threads yet.</p>
+            ) : (
+              <ul className="space-y-1.5">
+                {activeDiscussions.map((post) => (
+                  <li key={post.id} className="text-sm">
+                    <Link href={`/posts/${post.id}`} className="font-medium text-foreground underline">
+                      {post.author.handle ? `@${post.author.handle}` : post.author.displayName ?? "Member"}
+                    </Link>
+                    <span className="ml-2 text-xs text-muted-foreground">
+                      {post._count.comments} comment{post._count.comments === 1 ? "" : "s"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </div>
       </Card>
 
       <Card className="p-0">
