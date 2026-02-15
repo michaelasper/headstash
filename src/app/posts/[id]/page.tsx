@@ -78,7 +78,7 @@ export default async function PostDetailPage({
         orderBy: [{ createdAt: "asc" }],
         include: {
           author: {
-            select: { displayName: true, handle: true, email: true, avatarUrl: true },
+            select: { id: true, displayName: true, handle: true, email: true, avatarUrl: true },
           },
         },
       },
@@ -158,36 +158,79 @@ export default async function PostDetailPage({
       </Card>
 
       <Card>
-        {session?.user?.email ? (
-          <CommentForm postId={post.id} />
-        ) : (
-          <div className="flex items-center justify-between gap-4">
-            <p className="text-sm text-neutral-600">Sign in to comment.</p>
-            <Link href="/auth/signin" className={buttonClassName("primary")}>
-              Sign in
-            </Link>
-          </div>
-        )}
+        <div id="comment-compose">
+          {session?.user?.email ? (
+            <CommentForm postId={post.id} />
+          ) : (
+            <div className="flex items-center justify-between gap-4">
+              <p className="text-sm text-neutral-600">Sign in to comment.</p>
+              <Link href="/auth/signin" className={buttonClassName("primary")}>
+                Sign in
+              </Link>
+            </div>
+          )}
+        </div>
       </Card>
 
       <Card>
-        <h2 id="comments" className="text-sm font-medium">Comments</h2>
+        <div className="flex items-center justify-between gap-3">
+          <h2 id="comments" className="text-sm font-medium">Conversation</h2>
+          <Link href="#comment-compose" className="text-xs text-neutral-600 underline">
+            Add reply
+          </Link>
+        </div>
         {post.comments.length === 0 ? (
           <p className="mt-2 text-sm text-neutral-600">No comments yet.</p>
         ) : (
-          <ul className="mt-3 divide-y divide-neutral-200">
-            {post.comments.map((c) => (
-              <li key={c.id} className="py-3">
-                <div className="flex flex-col gap-1.5">
-                  <SocialProfileInline
-                    author={c.author}
-                    timestamp={c.createdAt.toLocaleString()}
-                    size="sm"
-                  />
-                  <p className="pl-[44px] whitespace-pre-wrap text-sm text-neutral-800">{c.body}</p>
-                </div>
-              </li>
-            ))}
+          <ul className="mt-4 space-y-3">
+            {post.comments.map((c, index) => {
+              const isViewerComment = Boolean(viewer && c.author.id === viewer.id);
+              const previous = index > 0 ? post.comments[index - 1] : null;
+              const isContinuation = Boolean(previous && previous.author.id === c.author.id);
+
+              return (
+                <li key={c.id} className={`flex ${isViewerComment ? "justify-end" : "justify-start"}`}>
+                  <div
+                    className={`w-full max-w-[92%] rounded-2xl border p-3 ${
+                      isViewerComment
+                        ? "border-neutral-900 bg-neutral-900 text-white"
+                        : "border-neutral-200 bg-white text-neutral-900"
+                    }`}
+                  >
+                    {!isContinuation ? (
+                      <div
+                        className={`flex items-center gap-2 text-xs ${
+                          isViewerComment ? "text-neutral-300" : "text-neutral-500"
+                        }`}
+                      >
+                        <span className="font-medium">
+                          {c.author.handle ? `@${c.author.handle.replace(/^@/, "")}` : c.author.displayName ?? "Member"}
+                        </span>
+                        <span>•</span>
+                        <span>{c.createdAt.toLocaleString()}</span>
+                      </div>
+                    ) : (
+                      <div className={`text-[11px] ${isViewerComment ? "text-neutral-400" : "text-neutral-500"}`}>
+                        {c.createdAt.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+                      </div>
+                    )}
+
+                    <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed">{c.body}</p>
+
+                    <div
+                      className={`mt-2 flex items-center gap-3 text-[11px] uppercase tracking-wide ${
+                        isViewerComment ? "text-neutral-300" : "text-neutral-500"
+                      }`}
+                    >
+                      <span>{isViewerComment ? "you" : "member"}</span>
+                      <Link href="#comment-compose" className="underline">
+                        reply
+                      </Link>
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
       </Card>
