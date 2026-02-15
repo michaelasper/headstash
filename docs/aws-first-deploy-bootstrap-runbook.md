@@ -87,7 +87,7 @@ npm ci
 npm run aws:bootstrap -- \
   --plan \
   --repo michaelasper/headstash \
-  --region us-east-1 \
+  --region us-west-2 \
   --profile headstash-bootstrap \
   --json \
   --out artifacts/aws-bootstrap.json
@@ -106,7 +106,7 @@ Review expected JSON keys:
 npm run aws:bootstrap -- \
   --apply \
   --repo michaelasper/headstash \
-  --region us-east-1 \
+  --region us-west-2 \
   --profile headstash-bootstrap \
   --json \
   --out artifacts/aws-bootstrap.json
