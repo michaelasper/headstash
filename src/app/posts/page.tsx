@@ -45,7 +45,6 @@ export default async function PostsPage() {
           select: {
             displayName: true,
             handle: true,
-            email: true,
             avatarUrl: true,
           },
         },

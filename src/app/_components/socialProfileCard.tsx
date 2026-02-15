@@ -3,12 +3,11 @@ import Link from "next/link";
 type AuthorLike = {
   displayName: string | null;
   handle: string | null;
-  email: string | null;
   avatarUrl: string | null;
 };
 
-function displayName(author: Pick<AuthorLike, "displayName" | "handle" | "email">) {
-  return author.displayName ?? author.handle ?? author.email ?? "Anonymous";
+function displayName(author: Pick<AuthorLike, "displayName" | "handle">) {
+  return author.displayName ?? author.handle ?? "Member";
 }
 
 function cleanHandle(handle: string | null) {

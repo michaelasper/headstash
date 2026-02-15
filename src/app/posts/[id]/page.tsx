@@ -67,7 +67,7 @@ export default async function PostDetailPage({
     where: { id },
     include: {
       author: {
-        select: { displayName: true, handle: true, email: true, avatarUrl: true },
+        select: { displayName: true, handle: true, avatarUrl: true },
       },
       favorites: viewer ? { where: { userId: viewer.id }, select: { id: true } } : false,
       _count: { select: { reactions: true, comments: true, favorites: true } },
@@ -78,7 +78,7 @@ export default async function PostDetailPage({
         orderBy: [{ createdAt: "asc" }],
         include: {
           author: {
-            select: { displayName: true, handle: true, email: true, avatarUrl: true },
+            select: { displayName: true, handle: true, avatarUrl: true },
           },
         },
       },
